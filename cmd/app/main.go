@@ -1,35 +1,28 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
+	"mini-sns-ws/internal/app"
+	"mini-sns-ws/internal/mongodb"
 	"net/http"
-	"os"
+	"time"
 
-	"mini-sns-ws/cmd/app/handlers"
-	"mini-sns-ws/cmd/app/middlewares"
-
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 )
 
-var version string // Application version
-
 func main() {
-	port := os.Getenv("PORT")
-	router := mux.NewRouter()
+	port := "6942"
+	router := httprouter.New()
 
-	if port == "" {
-		port = "8081"
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	router.Use(middlewares.LogMiddleware)
-	router.HandleFunc("/version", getVersion)
-	router.HandleFunc("/time", handlers.GetServerTime).Methods(http.MethodGet)
+	db := mongodb.NewMongoDB("sns_api", mongodb.Connect(ctx))
 
-	log.Printf("version %s listening on port %s", version, port)
+	app.NewUserServer(mongodb.MongoUserRepository{UserCollection: db.Collection("users")}, router)
+	app.NewPostsServer(mongodb.MongoUserRepository{UserCollection: db.Collection("posts")}, router)
+
+	log.Printf("listening on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
-}
-
-func getVersion(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, version)
 }
