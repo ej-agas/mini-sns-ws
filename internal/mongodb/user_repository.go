@@ -10,11 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type MongoUserRepository struct {
+type UserRepository struct {
 	UserCollection *mongo.Collection
 }
 
-func (r MongoUserRepository) Find(ctx context.Context, id string) (domain.User, error) {
+func (r UserRepository) Find(ctx context.Context, id string) (domain.User, error) {
 	user := domain.User{}
 	objId, err := primitive.ObjectIDFromHex(id)
 
@@ -31,7 +31,7 @@ func (r MongoUserRepository) Find(ctx context.Context, id string) (domain.User, 
 	return user, nil
 }
 
-func (r MongoUserRepository) FindBy(ctx context.Context, field string, value interface{}) ([]domain.User, error) {
+func (r UserRepository) FindBy(ctx context.Context, field string, value interface{}) ([]domain.User, error) {
 	var results []domain.User
 
 	cursor, err := r.UserCollection.Find(ctx, bson.D{{Key: field, Value: value}})
@@ -47,7 +47,7 @@ func (r MongoUserRepository) FindBy(ctx context.Context, field string, value int
 	return results, nil
 }
 
-func (r MongoUserRepository) Save(ctx context.Context, m domain.User) error {
+func (r UserRepository) Save(ctx context.Context, m domain.User) error {
 	_, err := r.UserCollection.InsertOne(ctx, m)
 
 	if err != nil {
@@ -57,7 +57,7 @@ func (r MongoUserRepository) Save(ctx context.Context, m domain.User) error {
 	return nil
 }
 
-func (r MongoUserRepository) Delete(ctx context.Context, id string) error {
+func (r UserRepository) Delete(ctx context.Context, id string) error {
 	_, err := r.UserCollection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}})
 
 	if err != nil {

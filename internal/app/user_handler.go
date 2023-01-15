@@ -20,8 +20,8 @@ func NewUserServer(userRepo domain.UserRepository, r *httprouter.Router) *UserSe
 	return s
 }
 
-func (s *UserServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.router.ServeHTTP(w, r)
+func (s *UserServer) routes() {
+	s.router.POST("/register", s.handleRegister())
 }
 
 func (s *UserServer) handleRegister() httprouter.Handle {

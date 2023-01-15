@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -19,9 +20,10 @@ func main() {
 	defer cancel()
 
 	db := mongodb.NewMongoDB("sns_api", mongodb.Connect(ctx))
+	validator := validator.New()
 
-	app.NewUserServer(mongodb.MongoUserRepository{UserCollection: db.Collection("users")}, router)
-	app.NewPostsServer(mongodb.MongoUserRepository{UserCollection: db.Collection("posts")}, router)
+	app.NewUserServer(mongodb.UserRepository{UserCollection: db.Collection("users")}, router)
+	app.NewPostHandler(mongodb.PostRepository{PostCollection: db.Collection("posts")}, validator, router)
 
 	log.Printf("listening on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
