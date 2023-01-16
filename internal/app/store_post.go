@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"encoding/json"
 	"mini-sns-ws/internal/domain"
 	"net/http"
@@ -24,7 +23,7 @@ func (handler *PostHandler) store() httprouter.Handle {
 		errorResponse, err := Validate(handler.validator, input)
 
 		if err != nil {
-			json.NewEncoder(w).Encode(errorResponse)
+			JSONResponse(w, errorResponse, http.StatusUnprocessableEntity)
 			return
 		}
 
@@ -34,6 +33,6 @@ func (handler *PostHandler) store() httprouter.Handle {
 			CreatedAt: primitive.NewDateTimeFromTime(time.Now()),
 		}
 
-		handler.repo.Save(context.Background(), post)
+		handler.repo.Save(r.Context(), post)
 	}
 }

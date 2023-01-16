@@ -7,9 +7,9 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func Validate(validate *validator.Validate, input interface{}) (*ErrorResponse, error) {
+func Validate(validate *validator.Validate, input interface{}) (*ValidationErrors, error) {
 	err := validate.Struct(input)
-	errorRes := NewErrorResponse()
+	errorRes := NewValidationErrors()
 
 	if err == nil {
 		return errorRes, nil
@@ -25,8 +25,6 @@ func Validate(validate *validator.Validate, input interface{}) (*ErrorResponse, 
 			errorRes.Add(field, fmt.Sprintf("The %s field should a minimum length of %s character(s).", strings.ReplaceAll(field, "_", " "), err.Param()))
 		}
 	}
-
-	fmt.Println(errorRes)
 
 	return errorRes, err
 }

@@ -21,5 +21,5 @@ func NewPostHandler(userRepo domain.PostRepository, validator *validator.Validat
 }
 
 func (postHandler *PostHandler) routes() {
-	postHandler.router.POST("/posts", postHandler.store())
+	postHandler.router.POST("/posts", AuthMiddleware(postHandler.store()))
 }
