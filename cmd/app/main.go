@@ -22,7 +22,7 @@ func main() {
 	db := mongodb.NewMongoDB("sns_api", mongodb.Connect(ctx))
 	validator := validator.New()
 
-	app.NewUserServer(mongodb.UserRepository{UserCollection: db.Collection("users")}, router)
+	app.NewUserHandler(mongodb.UserRepository{UserCollection: db.Collection("users")}, validator, router)
 	app.NewPostHandler(mongodb.PostRepository{PostCollection: db.Collection("posts")}, validator, router)
 
 	log.Printf("listening on port %s", port)

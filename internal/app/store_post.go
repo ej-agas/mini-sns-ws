@@ -17,7 +17,6 @@ type storePostInput struct {
 
 func (handler *PostHandler) store() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		w.Header().Add("content-type", "application/json")
 		input := storePostInput{}
 		json.NewDecoder(r.Body).Decode(&input)
 		errorResponse, err := Validate(handler.validator, input)
@@ -33,6 +32,11 @@ func (handler *PostHandler) store() httprouter.Handle {
 			CreatedAt: primitive.NewDateTimeFromTime(time.Now()),
 		}
 
-		handler.repo.Save(r.Context(), post)
+		if err := handler.repo.Save(r.Context(), post); err != nil {
+			JSONResponse(w, err, http.StatusBadRequest)
+			return
+		}
+
+		EmptyResponse(w, http.StatusCreated)
 	}
 }
