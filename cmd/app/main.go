@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	port := "6942"
+	port := "6943"
 	router := httprouter.New()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -22,7 +22,16 @@ func main() {
 	db := mongodb.NewMongoDB("sns_api", mongodb.Connect(ctx))
 	validator := validator.New()
 
-	app.NewUserHandler(mongodb.UserRepository{UserCollection: db.Collection("users")}, validator, router)
+	mailCfg := app.MailTransportConfig{
+		Host:     "0.0.0.0",
+		Port:     "32771",
+		From:     "noreply@minisns.com",
+		Password: "",
+	}
+
+	transport := app.NewMailTransport(mailCfg)
+
+	app.NewUserHandler(mongodb.UserRepository{UserCollection: db.Collection("users")}, transport, validator, router)
 	app.NewPostHandler(mongodb.PostRepository{PostCollection: db.Collection("posts")}, validator, router)
 
 	log.Printf("listening on port %s", port)

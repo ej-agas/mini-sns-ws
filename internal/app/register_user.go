@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"mini-sns-ws/internal/domain"
 	"net/http"
 
@@ -28,6 +29,18 @@ func (h *UserHandler) register() httprouter.Handle {
 			return
 		}
 
+		users, err := h.repo.FindBy(r.Context(), "email", input.Email)
+
+		if err != nil {
+			JSONResponse(w, err, http.StatusBadRequest)
+			return
+		}
+
+		if len(users) != 0 {
+			JSONResponse(w, Error{Message: "User already exists."}, http.StatusUnprocessableEntity)
+			return
+		}
+
 		user := domain.User{
 			ID:         primitive.NewObjectID(),
 			FirstName:  input.First_name,
@@ -38,8 +51,19 @@ func (h *UserHandler) register() httprouter.Handle {
 			IsVerified: false,
 		}
 
-		if err := h.repo.Save(r.Context(), user); err != nil {
+		// if err := h.repo.Save(r.Context(), user); err != nil {
+		// 	JSONResponse(w, err, http.StatusBadRequest)
+		// 	return
+		// }
+
+		randStr := GenerateRandomString(128)
+
+		subject := "Subject: This is the subject of the mail\n"
+		body := "Your Code: " + randStr
+
+		if err := h.transport.Send(user.Email, subject+body); err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)
+			fmt.Println(err)
 			return
 		}
 

@@ -9,12 +9,24 @@ import (
 
 type UserHandler struct {
 	repo      domain.UserRepository
+	transport domain.Transport
 	validator *validator.Validate
 	router    *httprouter.Router
 }
 
-func NewUserHandler(userRepo domain.UserRepository, validator *validator.Validate, r *httprouter.Router) *UserHandler {
-	h := &UserHandler{repo: userRepo, validator: validator, router: r}
+func NewUserHandler(
+	userRepo domain.UserRepository,
+	transport domain.Transport,
+	validator *validator.Validate,
+	r *httprouter.Router,
+) *UserHandler {
+	h := &UserHandler{
+		repo:      userRepo,
+		transport: transport,
+		validator: validator,
+		router:    r,
+	}
+
 	h.routes()
 
 	return h
