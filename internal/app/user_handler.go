@@ -9,14 +9,14 @@ import (
 
 type UserHandler struct {
 	repo      domain.UserRepository
-	transport domain.Transport
+	transport *MailTransport
 	validator *validator.Validate
 	router    *httprouter.Router
 }
 
 func NewUserHandler(
 	userRepo domain.UserRepository,
-	transport domain.Transport,
+	transport *MailTransport,
 	validator *validator.Validate,
 	r *httprouter.Router,
 ) *UserHandler {

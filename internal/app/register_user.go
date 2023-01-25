@@ -58,10 +58,23 @@ func (h *UserHandler) register() httprouter.Handle {
 
 		randStr := GenerateRandomString(128)
 
-		subject := "Subject: This is the subject of the mail\n"
-		body := "Your Code: " + randStr
+		data := struct {
+			Name string
+			URL  string
+		}{
+			Name: user.FullName(),
+			URL:  "http://localhost:6943/users/verify?token=" + randStr,
+		}
 
-		if err := h.transport.Send(user.Email, subject+body); err != nil {
+		mail, err := NewMail("internal/templates/VerifyAccount.html", []string{"foo@email.com"}, "noreply@mini-sns.com", "Verify", data)
+
+		if err != nil {
+			fmt.Println(err)
+			JSONResponse(w, err, http.StatusBadRequest)
+			return
+		}
+
+		if err := h.transport.Send(mail); err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)
 			fmt.Println(err)
 			return

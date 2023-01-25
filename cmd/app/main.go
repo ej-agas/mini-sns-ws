@@ -24,8 +24,7 @@ func main() {
 
 	mailCfg := app.MailTransportConfig{
 		Host:     "0.0.0.0",
-		Port:     "32771",
-		From:     "noreply@minisns.com",
+		Port:     "32769",
 		Password: "",
 	}
 

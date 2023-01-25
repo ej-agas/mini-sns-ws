@@ -2,6 +2,7 @@ package domain
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -19,6 +20,14 @@ type User struct {
 
 func (u User) Id() string {
 	return u.ID.String()
+}
+
+func (u *User) FullName() string {
+	if u.MiddleName == "" {
+		return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
+	}
+
+	return fmt.Sprintf("%s %s %s", u.FirstName, u.MiddleName, u.LastName)
 }
 
 func (u User) String() string {
