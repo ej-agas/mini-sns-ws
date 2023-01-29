@@ -3,6 +3,7 @@ package domain
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -15,7 +16,9 @@ type User struct {
 	Email      string             `bson:"email" json:"email"`
 	Password   string             `bson:"password" json:"password"`
 	IsVerified bool               `bson:"is_verified" json:"is_verified"`
-	VerifiedAt primitive.DateTime `bson:"verified_at" json:"verified_at"`
+	VerifiedAt primitive.DateTime `bson:"verified_at,omitempty" json:"verified_at,omitempty"`
+	CreatedAt  primitive.DateTime `bson:"created_at" json:"created_at"`
+	UpdatedAt  primitive.DateTime `bson:"updated_at" json:"updated_at"`
 }
 
 func (u User) Id() string {
@@ -28,6 +31,13 @@ func (u *User) FullName() string {
 	}
 
 	return fmt.Sprintf("%s %s %s", u.FirstName, u.MiddleName, u.LastName)
+}
+
+func (u *User) Verify() {
+	now := time.Now()
+	u.IsVerified = true
+	u.VerifiedAt = primitive.NewDateTimeFromTime(now)
+	u.UpdatedAt = primitive.NewDateTimeFromTime(now)
 }
 
 func (u User) String() string {

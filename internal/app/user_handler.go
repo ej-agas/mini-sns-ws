@@ -8,23 +8,26 @@ import (
 )
 
 type UserHandler struct {
-	repo      domain.UserRepository
-	transport *MailTransport
-	validator *validator.Validate
-	router    *httprouter.Router
+	repo          domain.UserRepository
+	transport     *MailTransport
+	keyValueStore domain.KeyValueStore
+	validator     *validator.Validate
+	router        *httprouter.Router
 }
 
 func NewUserHandler(
 	userRepo domain.UserRepository,
 	transport *MailTransport,
+	keyValueStore domain.KeyValueStore,
 	validator *validator.Validate,
 	r *httprouter.Router,
 ) *UserHandler {
 	h := &UserHandler{
-		repo:      userRepo,
-		transport: transport,
-		validator: validator,
-		router:    r,
+		repo:          userRepo,
+		transport:     transport,
+		keyValueStore: keyValueStore,
+		validator:     validator,
+		router:        r,
 	}
 
 	h.routes()
@@ -33,5 +36,6 @@ func NewUserHandler(
 }
 
 func (h *UserHandler) routes() {
-	h.router.POST("/register", h.register())
+	h.router.POST("/users", h.register())
+	h.router.GET("/users/verify", h.verify())
 }

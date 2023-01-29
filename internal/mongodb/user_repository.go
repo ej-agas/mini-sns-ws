@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserRepository struct {
@@ -48,7 +49,7 @@ func (r UserRepository) FindBy(ctx context.Context, field string, value interfac
 }
 
 func (r UserRepository) Save(ctx context.Context, m domain.User) error {
-	_, err := r.UserCollection.InsertOne(ctx, m)
+	_, err := r.UserCollection.UpdateOne(ctx, bson.D{{Key: "_id", Value: m.ID}}, bson.M{"$set": m}, options.Update().SetUpsert(true))
 
 	if err != nil {
 		return err

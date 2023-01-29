@@ -11,8 +11,8 @@ type Redis struct {
 	client *redis.Client
 }
 
-func (r *Redis) Store(ctx context.Context, key, value string, ttlSeconds int) error {
-	return r.client.Set(ctx, key, value, time.Duration(ttlSeconds)*time.Second).Err()
+func (r *Redis) Store(ctx context.Context, key string, value interface{}, ttl int) error {
+	return r.client.Set(ctx, key, value, time.Duration(ttl)*time.Second).Err()
 }
 
 func (r *Redis) Get(ctx context.Context, key string) (string, error) {
@@ -23,4 +23,24 @@ func (r *Redis) Get(ctx context.Context, key string) (string, error) {
 	}
 
 	return val, nil
+}
+
+func (r *Redis) Delete(ctx context.Context, keys ...string) error {
+	_, err := r.client.Del(ctx, keys...).Result()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func NewRedis(address, password string, db int) *Redis {
+	return &Redis{
+		redis.NewClient(&redis.Options{
+			Addr:     address,
+			Password: password,
+			DB:       db,
+		}),
+	}
 }

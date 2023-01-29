@@ -5,6 +5,7 @@ import (
 	"log"
 	"mini-sns-ws/internal/app"
 	"mini-sns-ws/internal/mongodb"
+	"mini-sns-ws/internal/redis"
 	"net/http"
 	"time"
 
@@ -30,7 +31,9 @@ func main() {
 
 	transport := app.NewMailTransport(mailCfg)
 
-	app.NewUserHandler(mongodb.UserRepository{UserCollection: db.Collection("users")}, transport, validator, router)
+	redis := redis.NewRedis("0.0.0.0:7000", "", 0)
+
+	app.NewUserHandler(mongodb.UserRepository{UserCollection: db.Collection("users")}, transport, redis, validator, router)
 	app.NewPostHandler(mongodb.PostRepository{PostCollection: db.Collection("posts")}, validator, router)
 
 	log.Printf("listening on port %s", port)
