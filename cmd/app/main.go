@@ -30,10 +30,17 @@ func main() {
 	}
 
 	transport := app.NewMailTransport(mailCfg)
+	hasher := &app.Argon2IDHasher{Params: app.Argon2IDParams{
+		Memory:      64 * 1024,
+		Iterations:  3,
+		Parallelism: 4,
+		SaltLength:  16,
+		KeyLength:   32,
+	}}
 
 	redis := redis.NewRedis("0.0.0.0:7000", "", 0)
 
-	app.NewUserHandler(mongodb.UserRepository{UserCollection: db.Collection("users")}, transport, redis, validator, router)
+	app.NewUserHandler(mongodb.UserRepository{UserCollection: db.Collection("users")}, hasher, transport, redis, validator, router)
 	app.NewPostHandler(mongodb.PostRepository{PostCollection: db.Collection("posts")}, validator, router)
 
 	log.Printf("listening on port %s", port)

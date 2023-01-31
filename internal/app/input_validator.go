@@ -29,6 +29,10 @@ func Validate(validate *validator.Validate, input interface{}) (*ValidationError
 			errorRes.Add(field, fmt.Sprintf("The %s field should only contain alphanumeric characters.", strings.ReplaceAll(field, "_", " ")))
 		case "email":
 			errorRes.Add(field, fmt.Sprintf("The %s field should be a valid email address.", field))
+		case "alphanumunicode":
+			errorRes.Add(field, fmt.Sprintf("The %s field should only contain alphanumeric unicode characters.", strings.ReplaceAll(field, "_", " ")))
+		case "ascii":
+			errorRes.Add(field, fmt.Sprintf("The %s field should only contain ascii characters.", strings.ReplaceAll(field, "_", " ")))
 		}
 	}
 

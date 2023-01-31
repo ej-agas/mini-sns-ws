@@ -16,7 +16,7 @@ type registerInput struct {
 	Middle_name string `json:"middle_name" validate:"omitempty,alpha"`
 	Last_name   string `json:"last_name" validate:"required,alpha"`
 	Email       string `json:"email" validate:"required,email"`
-	Password    string `json:"password" validate:"required,alphanum"`
+	Password    string `json:"password" validate:"required,ascii"`
 }
 
 func (h *UserHandler) register() httprouter.Handle {
@@ -42,6 +42,14 @@ func (h *UserHandler) register() httprouter.Handle {
 			return
 		}
 
+		hashedPassword, err := h.hasher.Hash(input.Password)
+
+		if err != nil {
+			fmt.Println(err)
+			JSONResponse(w, err, http.StatusBadRequest)
+			return
+		}
+
 		now := time.Now()
 		user := domain.User{
 			ID:         primitive.NewObjectID(),
@@ -49,7 +57,7 @@ func (h *UserHandler) register() httprouter.Handle {
 			MiddleName: input.Middle_name,
 			LastName:   input.Last_name,
 			Email:      input.Email,
-			Password:   input.Password,
+			Password:   hashedPassword,
 			IsVerified: false,
 			CreatedAt:  primitive.NewDateTimeFromTime(now),
 			UpdatedAt:  primitive.NewDateTimeFromTime(now),
@@ -87,7 +95,7 @@ func sendVerificationEmail(transport MailTransport, user domain.User, verificati
 		URL:  "http://localhost:6943/users/verify?token=" + verificationToken,
 	}
 
-	mailTo := []string{"foo@email.com"}
+	mailTo := []string{user.Email}
 	subject := "Verify your account"
 
 	mail, err := NewMail("internal/templates/VerifyAccount.html", mailTo, "noreply@mini-sns.com", subject, data)

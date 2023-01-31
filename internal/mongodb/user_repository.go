@@ -48,6 +48,18 @@ func (r UserRepository) FindBy(ctx context.Context, field string, value interfac
 	return results, nil
 }
 
+func (r UserRepository) FindOneBy(ctx context.Context, field string, value interface{}) (domain.User, error) {
+	var user domain.User
+
+	result := r.UserCollection.FindOne(ctx, bson.D{{Key: field, Value: value}})
+
+	if err := result.Decode(&user); err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
 func (r UserRepository) Save(ctx context.Context, m domain.User) error {
 	_, err := r.UserCollection.UpdateOne(ctx, bson.D{{Key: "_id", Value: m.ID}}, bson.M{"$set": m}, options.Update().SetUpsert(true))
 
