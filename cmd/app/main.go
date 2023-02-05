@@ -7,6 +7,7 @@ import (
 	"mini-sns-ws/internal/mongodb"
 	"mini-sns-ws/internal/redis"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -39,9 +40,14 @@ func main() {
 	}}
 
 	redis := redis.NewRedis("0.0.0.0:7000", "", 0)
+	userRepository := mongodb.UserRepository{UserCollection: db.Collection("users")}
+	tokenService := app.JWTTokenService{SecretKey: os.Getenv("JWT_SECRET")}
 
-	app.NewUserHandler(mongodb.UserRepository{UserCollection: db.Collection("users")}, hasher, transport, redis, validator, router)
-	app.NewPostHandler(mongodb.PostRepository{PostCollection: db.Collection("posts")}, validator, router)
+	authMiddleware := app.AuthMiddleware{TokenService: tokenService, UserRepository: userRepository}
+
+	app.NewUserHandler(userRepository, hasher, transport, redis, validator, router)
+	app.NewLoginHandler(userRepository, hasher, tokenService, validator, router)
+	app.NewPostHandler(authMiddleware, mongodb.PostRepository{PostCollection: db.Collection("posts")}, validator, router)
 
 	log.Printf("listening on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

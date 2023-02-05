@@ -26,9 +26,11 @@ func (handler *PostHandler) store() httprouter.Handle {
 			return
 		}
 
+		user := (r.Context().Value(LoggedInUser)).(domain.User)
 		post := domain.Post{
 			Title:     input.Title,
 			Body:      input.Body,
+			UserId:    user.ID,
 			CreatedAt: primitive.NewDateTimeFromTime(time.Now()),
 		}
 

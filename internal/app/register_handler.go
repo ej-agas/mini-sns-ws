@@ -76,8 +76,8 @@ func (h *UserHandler) register() httprouter.Handle {
 			return
 		}
 
-		tenMinutes := 600
-		if err := h.keyValueStore.Store(r.Context(), randStr, user.ID.Hex(), tenMinutes); err != nil {
+		tenMinutes := 10 * time.Minute
+		if err := h.keyValueStore.Store(r.Context(), randStr, user.ID.Hex(), int(tenMinutes)); err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)
 			return
 		}

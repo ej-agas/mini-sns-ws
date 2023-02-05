@@ -1,11 +1,11 @@
 package app
 
 import (
+	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"math/rand"
 	"strings"
 
 	"golang.org/x/crypto/argon2"
@@ -19,10 +19,6 @@ var (
 type Hasher interface {
 	Hash(text string) (string, error)
 	Check(plain, hashed string) (bool, error)
-}
-
-type Hash interface {
-	String() string
 }
 
 type Argon2IDHash struct {
@@ -82,14 +78,14 @@ func (a *Argon2IDHasher) makeSalt() ([]byte, error) {
 }
 
 func (a *Argon2IDHasher) Check(plain, encodedHash string) (bool, error) {
-	decoded, err := a.FromString(encodedHash)
+	hash, err := a.FromString(encodedHash)
 	if err != nil {
 		return false, err
 	}
 
-	otherHash := argon2.IDKey([]byte(plain), decoded.Salt, decoded.Params.Iterations, decoded.Params.Memory, decoded.Params.Parallelism, decoded.Params.KeyLength)
+	otherHash := argon2.IDKey([]byte(plain), hash.Salt, hash.Params.Iterations, hash.Params.Memory, hash.Params.Parallelism, hash.Params.KeyLength)
 
-	if subtle.ConstantTimeCompare(decoded.Value, otherHash) == 1 {
+	if subtle.ConstantTimeCompare(hash.Value, otherHash) == 1 {
 		return true, nil
 	}
 

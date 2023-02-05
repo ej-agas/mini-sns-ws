@@ -41,5 +41,4 @@ func NewUserHandler(
 func (h *UserHandler) routes() {
 	h.router.POST("/users", h.register())
 	h.router.GET("/users/verify", h.verify())
-	h.router.POST("/login", h.login())
 }

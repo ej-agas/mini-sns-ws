@@ -8,18 +8,19 @@ import (
 )
 
 type PostHandler struct {
-	repo      domain.PostRepository
-	validator *validator.Validate
-	router    *httprouter.Router
+	authMiddleware AuthMiddleware
+	repo           domain.PostRepository
+	validator      *validator.Validate
+	router         *httprouter.Router
 }
 
-func NewPostHandler(userRepo domain.PostRepository, validator *validator.Validate, r *httprouter.Router) *PostHandler {
-	ps := &PostHandler{repo: userRepo, validator: validator, router: r}
+func NewPostHandler(authMiddleware AuthMiddleware, userRepo domain.PostRepository, validator *validator.Validate, r *httprouter.Router) *PostHandler {
+	ps := &PostHandler{authMiddleware: authMiddleware, repo: userRepo, validator: validator, router: r}
 	ps.routes()
 
 	return ps
 }
 
 func (postHandler *PostHandler) routes() {
-	postHandler.router.POST("/posts", AuthMiddleware(postHandler.store()))
+	postHandler.router.POST("/posts", postHandler.authMiddleware.Handle(postHandler.store()))
 }
