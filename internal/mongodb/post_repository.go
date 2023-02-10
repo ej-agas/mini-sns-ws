@@ -47,6 +47,18 @@ func (r PostRepository) FindBy(ctx context.Context, field string, value interfac
 	return results, nil
 }
 
+func (r PostRepository) FindOneBy(ctx context.Context, field string, value interface{}) (domain.Post, error) {
+	var post domain.Post
+
+	result := r.PostCollection.FindOne(ctx, bson.D{{Key: field, Value: value}})
+
+	if err := result.Decode(&post); err != nil {
+		return post, err
+	}
+
+	return post, nil
+}
+
 func (r PostRepository) Save(ctx context.Context, m domain.Post) error {
 	_, err := r.PostCollection.InsertOne(ctx, m)
 

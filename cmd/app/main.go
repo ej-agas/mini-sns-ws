@@ -39,15 +39,20 @@ func main() {
 		KeyLength:   32,
 	}}
 
-	redis := redis.NewRedis("0.0.0.0:7000", "", 0)
 	userRepository := mongodb.UserRepository{UserCollection: db.Collection("users")}
-	tokenService := app.JWTTokenService{SecretKey: os.Getenv("JWT_SECRET")}
+	postRepository := mongodb.PostRepository{PostCollection: db.Collection("posts")}
 
+	redis := redis.NewRedis("0.0.0.0:7000", "", 0)
+	tokenService := app.JWTTokenService{SecretKey: os.Getenv("JWT_SECRET")}
 	authMiddleware := app.AuthMiddleware{TokenService: tokenService, UserRepository: userRepository}
 
 	app.NewUserHandler(userRepository, hasher, transport, redis, validator, router)
 	app.NewLoginHandler(userRepository, hasher, tokenService, validator, router)
-	app.NewPostHandler(authMiddleware, mongodb.PostRepository{PostCollection: db.Collection("posts")}, validator, router)
+
+	app.NewPostHandler(authMiddleware, postRepository, validator, router)
+
+	app.NewGetPostsHandler(authMiddleware, postRepository, router)
+	app.NewGetPostHandler(postRepository, router)
 
 	log.Printf("listening on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
