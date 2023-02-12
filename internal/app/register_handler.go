@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 	"mini-sns-ws/internal/domain"
 	"net/http"
 	"time"
@@ -45,7 +44,6 @@ func (h *UserHandler) register() httprouter.Handle {
 		hashedPassword, err := h.hasher.Hash(input.Password)
 
 		if err != nil {
-			fmt.Println(err)
 			JSONResponse(w, err, http.StatusBadRequest)
 			return
 		}
@@ -64,7 +62,6 @@ func (h *UserHandler) register() httprouter.Handle {
 		}
 
 		if err := h.repo.Save(r.Context(), user); err != nil {
-			fmt.Println(err)
 			JSONResponse(w, err, http.StatusBadRequest)
 			return
 		}

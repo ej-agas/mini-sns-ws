@@ -22,7 +22,7 @@ func Validate(validate *validator.Validate, input interface{}) (*ValidationError
 		case "required":
 			errorRes.Add(field, fmt.Sprintf("The %s field is required.", strings.ReplaceAll(field, "_", " ")))
 		case "gte":
-			errorRes.Add(field, fmt.Sprintf("The %s field should a minimum length of %s character(s).", strings.ReplaceAll(field, "_", " "), err.Param()))
+			errorRes.Add(field, fmt.Sprintf("The %s field should have a minimum length of %s character(s).", strings.ReplaceAll(field, "_", " "), err.Param()))
 		case "alpha":
 			errorRes.Add(field, fmt.Sprintf("The %s field should only contain alpha characters.", strings.ReplaceAll(field, "_", " ")))
 		case "alphanum":

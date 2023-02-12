@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"mini-sns-ws/internal/domain"
 	"time"
 
@@ -17,6 +16,7 @@ type TokenService interface {
 
 type JWTTokenService struct {
 	SecretKey string
+	Expiry    time.Duration
 }
 
 func (service JWTTokenService) GenerateFor(user domain.User) (string, error) {
@@ -25,7 +25,7 @@ func (service JWTTokenService) GenerateFor(user domain.User) (string, error) {
 		Issuer("mini-sns-ws").
 		Claim("user_id", user.ID.Hex()).
 		IssuedAt(now).
-		Expiration(now.Add(1 * time.Hour)).
+		Expiration(time.Now().Add(service.Expiry)).
 		Build()
 
 	if err != nil {
@@ -33,8 +33,6 @@ func (service JWTTokenService) GenerateFor(user domain.User) (string, error) {
 	}
 
 	serialized, err := jwt.Sign(token, jwa.HS512, []byte(service.SecretKey))
-
-	fmt.Println(serialized)
 
 	if err != nil {
 		return "", err
@@ -51,7 +49,6 @@ func (service JWTTokenService) FromString(tokenAsString string) (jwt.Token, erro
 	token, err := jwt.Parse([]byte(tokenAsString), jwt.WithVerify(jwa.HS512, []byte(service.SecretKey)), jwt.WithValidate(true))
 
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 

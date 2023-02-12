@@ -9,20 +9,16 @@ import (
 )
 
 type GetPostHandler struct {
-	repo   domain.PostRepository
-	router *httprouter.Router
+	authMiddleware AuthMiddleware
+	repo           domain.PostRepository
+	router         *httprouter.Router
 }
 
-func NewGetPostHandler(repo domain.PostRepository, router *httprouter.Router) *GetPostHandler {
-	handler := &GetPostHandler{repo: repo, router: router}
-
-	handler.routes()
+func NewGetPostHandler(authMiddleware AuthMiddleware, repo domain.PostRepository, router *httprouter.Router) *GetPostHandler {
+	handler := &GetPostHandler{authMiddleware: authMiddleware, repo: repo, router: router}
+	handler.router.GET("/api/v1/posts/:id", handler.authMiddleware.Handle(handler.handle()))
 
 	return handler
-}
-
-func (handler *GetPostHandler) routes() {
-	handler.router.GET("/posts/:id", handler.handle())
 }
 
 func (handler *GetPostHandler) handle() httprouter.Handle {
@@ -35,10 +31,14 @@ func (handler *GetPostHandler) handle() httprouter.Handle {
 			return
 		}
 
-		post, err := handler.repo.FindOneBy(r.Context(), "_id", postObjId)
+		filter := domain.NewFilter()
+		filter["_id"] = postObjId
+
+		post, err := handler.repo.FindOneBy(r.Context(), filter)
 
 		if err != nil {
 			EmptyResponse(w, 404)
+			return
 		}
 
 		JSONResponse(w, post, 200)

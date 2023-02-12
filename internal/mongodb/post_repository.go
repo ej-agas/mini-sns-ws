@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type PostRepository struct {
@@ -31,10 +32,10 @@ func (r PostRepository) Find(ctx context.Context, id string) (domain.Post, error
 	return post, nil
 }
 
-func (r PostRepository) FindBy(ctx context.Context, field string, value interface{}) ([]domain.Post, error) {
+func (r PostRepository) FindBy(ctx context.Context, filter domain.Filter) ([]domain.Post, error) {
 	var results []domain.Post
 
-	cursor, err := r.PostCollection.Find(ctx, bson.D{{Key: field, Value: value}})
+	cursor, err := r.PostCollection.Find(ctx, filter)
 
 	if err != nil {
 		return nil, err
@@ -47,10 +48,10 @@ func (r PostRepository) FindBy(ctx context.Context, field string, value interfac
 	return results, nil
 }
 
-func (r PostRepository) FindOneBy(ctx context.Context, field string, value interface{}) (domain.Post, error) {
+func (r PostRepository) FindOneBy(ctx context.Context, filter domain.Filter) (domain.Post, error) {
 	var post domain.Post
 
-	result := r.PostCollection.FindOne(ctx, bson.D{{Key: field, Value: value}})
+	result := r.PostCollection.FindOne(ctx, filter)
 
 	if err := result.Decode(&post); err != nil {
 		return post, err
@@ -60,7 +61,7 @@ func (r PostRepository) FindOneBy(ctx context.Context, field string, value inter
 }
 
 func (r PostRepository) Save(ctx context.Context, m domain.Post) error {
-	_, err := r.PostCollection.InsertOne(ctx, m)
+	_, err := r.PostCollection.UpdateOne(ctx, bson.D{{Key: "_id", Value: m.ID}}, bson.M{"$set": m}, options.Update().SetUpsert(true))
 
 	if err != nil {
 		return err
@@ -71,6 +72,16 @@ func (r PostRepository) Save(ctx context.Context, m domain.Post) error {
 
 func (r PostRepository) Delete(ctx context.Context, id string) error {
 	_, err := r.PostCollection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r PostRepository) DeleteBy(ctx context.Context, filter domain.Filter) error {
+	_, err := r.PostCollection.DeleteMany(ctx, filter)
 
 	if err != nil {
 		return err

@@ -31,14 +31,8 @@ func NewLoginHandler(
 		validator:    validator,
 		router:       r,
 	}
-
-	h.registerRoute()
-
+	h.router.POST("/api/v1/login", h.login())
 	return h
-}
-
-func (h *LoginHandler) registerRoute() {
-	h.router.POST("/login", h.login())
 }
 
 type loginInput struct {

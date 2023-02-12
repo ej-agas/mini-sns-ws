@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"mini-sns-ws/internal/domain"
 	"net/http"
 	"strings"
@@ -30,9 +29,6 @@ func (middleware *AuthMiddleware) Handle(next httprouter.Handle) httprouter.Hand
 		}
 
 		plainToken := strings.Split(bearerToken, " ")[1]
-
-		fmt.Println(plainToken)
-
 		token, err := middleware.TokenService.FromString(plainToken)
 
 		if err != nil {
@@ -45,7 +41,6 @@ func (middleware *AuthMiddleware) Handle(next httprouter.Handle) httprouter.Hand
 			return
 		}
 
-		fmt.Println(token.Get("user_id"))
 		ctx := r.Context()
 		userId, ok := token.Get("user_id")
 

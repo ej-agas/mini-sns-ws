@@ -24,10 +24,12 @@ func (handler GetPostsHandler) GetPosts() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		user := r.Context().Value(LoggedInUser).(domain.User)
 
-		result, err := handler.repo.FindBy(r.Context(), "user_id", user.ID)
+		filter := domain.NewFilter()
+		filter["user_id"] = user.ID
+		result, err := handler.repo.FindBy(r.Context(), filter)
 
 		if err != nil {
-			JSONResponse(w, Error{Message: err.Error()}, 404)
+			EmptyResponse(w, 404)
 			return
 		}
 
