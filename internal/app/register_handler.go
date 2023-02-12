@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -18,7 +19,37 @@ type registerInput struct {
 	Password    string `json:"password" validate:"required,ascii"`
 }
 
-func (h *UserHandler) register() httprouter.Handle {
+type RegisterUserHandler struct {
+	repo          domain.UserRepository
+	hasher        Hasher
+	transport     *MailTransport
+	keyValueStore domain.KeyValueStore
+	validator     *validator.Validate
+	router        *httprouter.Router
+}
+
+func NewRegisterUserHandler(
+	userRepo domain.UserRepository,
+	hasher Hasher,
+	transport *MailTransport,
+	keyValueStore domain.KeyValueStore,
+	validator *validator.Validate,
+	r *httprouter.Router,
+) *RegisterUserHandler {
+	handler := &RegisterUserHandler{
+		repo:          userRepo,
+		hasher:        hasher,
+		transport:     transport,
+		keyValueStore: keyValueStore,
+		validator:     validator,
+		router:        r,
+	}
+	handler.router.POST("/api/v1/register", handler.register())
+
+	return handler
+}
+
+func (h *RegisterUserHandler) register() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		input := registerInput{}
 		json.NewDecoder(r.Body).Decode(&input)
@@ -89,7 +120,7 @@ func sendVerificationEmail(transport MailTransport, user domain.User, verificati
 		URL  string
 	}{
 		Name: user.FullName(),
-		URL:  "http://localhost:6943/users/verify?token=" + verificationToken,
+		URL:  "http://localhost:6943/api/v1/verify?token=" + verificationToken,
 	}
 
 	mailTo := []string{user.Email}

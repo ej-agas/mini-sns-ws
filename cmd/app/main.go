@@ -45,7 +45,8 @@ func main() {
 	tokenService := app.JWTTokenService{SecretKey: os.Getenv("JWT_SECRET"), Expiry: 12 * time.Hour}
 	authMiddleware := app.AuthMiddleware{TokenService: tokenService, UserRepository: userRepository}
 
-	app.NewUserHandler(userRepository, hasher, transport, redis, validator, router)
+	app.NewRegisterUserHandler(userRepository, hasher, transport, redis, validator, router)
+	app.NewVerifyUserHandler(userRepository, redis, router)
 	app.NewLoginHandler(userRepository, hasher, tokenService, validator, router)
 
 	app.NewCreatePostHandler(authMiddleware, postRepository, validator, router)

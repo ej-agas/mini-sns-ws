@@ -2,28 +2,50 @@ package app
 
 import (
 	"fmt"
+	"mini-sns-ws/internal/domain"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 )
 
-func (h *UserHandler) verify() httprouter.Handle {
+type VerifyUserHandler struct {
+	repo          domain.UserRepository
+	keyValueStore domain.KeyValueStore
+	router        *httprouter.Router
+}
+
+func NewVerifyUserHandler(
+	userRepo domain.UserRepository,
+	keyValueStore domain.KeyValueStore,
+	router *httprouter.Router,
+) *VerifyUserHandler {
+	handler := &VerifyUserHandler{
+		repo:          userRepo,
+		keyValueStore: keyValueStore,
+		router:        router,
+	}
+
+	handler.router.GET("/api/v1/verify", handler.verify())
+
+	return handler
+}
+func (handler *VerifyUserHandler) verify() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		token := r.URL.Query().Get("token")
 
 		if token == "" {
-			EmptyResponse(w, 404)
+			JSONResponse(w, Error{"Invalid or expired token."}, 422)
 			return
 		}
 
-		userId, err := h.keyValueStore.Get(r.Context(), token)
+		userId, err := handler.keyValueStore.Get(r.Context(), token)
 
 		if err != nil {
 			JSONResponse(w, Error{"Invalid or expired token."}, 422)
 			return
 		}
 
-		user, err := h.repo.Find(r.Context(), userId)
+		user, err := handler.repo.Find(r.Context(), userId)
 
 		if err != nil {
 			JSONResponse(w, err.Error(), 400)
@@ -31,12 +53,12 @@ func (h *UserHandler) verify() httprouter.Handle {
 		}
 
 		user.Verify()
-		if err := h.repo.Save(r.Context(), user); err != nil {
+		if err := handler.repo.Save(r.Context(), user); err != nil {
 			JSONResponse(w, Error{fmt.Sprintf("Error verifying user: %s", err.Error())}, 400)
 			return
 		}
 
-		h.keyValueStore.Delete(r.Context(), token)
+		handler.keyValueStore.Delete(r.Context(), token)
 
 		EmptyResponse(w, 200)
 	}
