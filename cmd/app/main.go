@@ -14,6 +14,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+var version string // application version
+
 func main() {
 	port := "6943"
 	router := httprouter.New()
@@ -24,8 +26,8 @@ func main() {
 	validator := validator.New()
 
 	mailCfg := app.MailTransportConfig{
-		Host:     "0.0.0.0",
-		Port:     "32769",
+		Host:     os.Getenv("MAIL_HOST"),
+		Port:     os.Getenv("MAIL_PORT"),
 		Password: "",
 	}
 
@@ -41,7 +43,7 @@ func main() {
 	userRepository := mongodb.UserRepository{UserCollection: db.Collection("users")}
 	postRepository := mongodb.PostRepository{PostCollection: db.Collection("posts")}
 
-	redis := redis.NewRedis("0.0.0.0:7000", "", 0)
+	redis := redis.NewRedis(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), "", 0)
 	tokenService := app.JWTTokenService{SecretKey: os.Getenv("JWT_SECRET"), Expiry: 12 * time.Hour}
 	authMiddleware := app.AuthMiddleware{TokenService: tokenService, UserRepository: userRepository}
 
@@ -55,6 +57,6 @@ func main() {
 	app.NewUpdatePostHandler(authMiddleware, postRepository, validator, router)
 	app.NewDeletePostHandler(authMiddleware, postRepository, router)
 
-	log.Printf("listening on port %s", port)
+	log.Printf("version %s listening on port %s", version, port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }

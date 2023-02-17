@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v9"
@@ -35,10 +36,10 @@ func (r *Redis) Delete(ctx context.Context, keys ...string) error {
 	return nil
 }
 
-func NewRedis(address, password string, db int) *Redis {
+func NewRedis(host string, port string, password string, db int) *Redis {
 	return &Redis{
 		redis.NewClient(&redis.Options{
-			Addr:     address,
+			Addr:     fmt.Sprintf("%s:%s", host, port),
 			Password: password,
 			DB:       db,
 		}),

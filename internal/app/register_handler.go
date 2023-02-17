@@ -2,7 +2,10 @@ package app
 
 import (
 	"encoding/json"
+	"html/template"
+	"log"
 	"mini-sns-ws/internal/domain"
+	"mini-sns-ws/internal/templates"
 	"net/http"
 	"time"
 
@@ -49,18 +52,18 @@ func NewRegisterUserHandler(
 	return handler
 }
 
-func (h *RegisterUserHandler) register() httprouter.Handle {
+func (handler *RegisterUserHandler) register() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		input := registerInput{}
 		json.NewDecoder(r.Body).Decode(&input)
-		errorResponse, err := Validate(h.validator, input)
+		errorResponse, err := Validate(handler.validator, input)
 
 		if err != nil {
 			JSONResponse(w, errorResponse, http.StatusUnprocessableEntity)
 			return
 		}
 
-		users, err := h.repo.FindBy(r.Context(), "email", input.Email)
+		users, err := handler.repo.FindBy(r.Context(), "email", input.Email)
 
 		if err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)
@@ -72,7 +75,7 @@ func (h *RegisterUserHandler) register() httprouter.Handle {
 			return
 		}
 
-		hashedPassword, err := h.hasher.Hash(input.Password)
+		hashedPassword, err := handler.hasher.Hash(input.Password)
 
 		if err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)
@@ -92,20 +95,20 @@ func (h *RegisterUserHandler) register() httprouter.Handle {
 			UpdatedAt:  primitive.NewDateTimeFromTime(now),
 		}
 
-		if err := h.repo.Save(r.Context(), user); err != nil {
+		if err := handler.repo.Save(r.Context(), user); err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)
 			return
 		}
 
 		randStr := GenerateRandomString(128)
 
-		if err := sendVerificationEmail(*h.transport, user, randStr); err != nil {
+		if err := sendVerificationEmail(*handler.transport, user, randStr); err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)
 			return
 		}
 
 		tenMinutes := 10 * time.Minute
-		if err := h.keyValueStore.Store(r.Context(), randStr, user.ID.Hex(), int(tenMinutes)); err != nil {
+		if err := handler.keyValueStore.Store(r.Context(), randStr, user.ID.Hex(), int(tenMinutes)); err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)
 			return
 		}
@@ -126,9 +129,11 @@ func sendVerificationEmail(transport MailTransport, user domain.User, verificati
 	mailTo := []string{user.Email}
 	subject := "Verify your account"
 
-	mail, err := NewMail("internal/templates/VerifyAccount.html", mailTo, "noreply@mini-sns.com", subject, data)
+	template := template.Must(template.New("layout").Parse(templates.VerifyAccount))
+	mail, err := NewMail(template, mailTo, "noreply@mini-sns.com", subject, data)
 
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 

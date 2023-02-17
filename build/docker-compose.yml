@@ -1,0 +1,68 @@
+version: '3.8'
+ 
+services:
+  app:
+      image: mini-sns-ws:latest
+      container_name: mini-sns-app
+      restart: unless-stopped
+      tty: true
+      environment:
+        APP_ENV: local
+        MAIL_HOST: mini-sns-mail
+        MAIL_PORT: 1025
+        MAIL_USER:
+        MAIL_PASSWORD:
+        JWT_SECRET:
+        REDIS_HOST: mini-sns-redis
+        REDIS_PORT: 6379
+        REDIS_DB: 0
+        REDIS_PASSWORD: ""
+        DB_NAME: sns_api
+        MONGODB_URI: mongodb://root:tjGlF62fBY4OAMocf8y@mini-sns-mongodb:27017
+      ports:
+        - "6943:6943"
+      networks: 
+        - mini-sns-network
+  redis:
+    image: redis:7-alpine
+    container_name: mini-sns-redis
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 7001:6379
+    volumes:
+      - redis:/data
+    networks:
+      - mini-sns-network
+  mongodb:
+      image: mongo-express:1.0.0-alpha.4
+      container_name: mini-sns-mongodb
+      restart: unless-stopped
+      tty: true
+      ports:
+        - "27018:27017"
+      environment:
+        MONGODB_INITDB_ROOT_USERNAME: root
+        MONGODB_INITDB_ROOT_PASSWORD: tjGlF62fBY4OAMocf8y
+      networks: 
+        - mini-sns-network
+      volumes:
+        - mongodb-data:/var/mongodb-data
+  mailcatcher:
+    container_name: mini-sns-mail
+    restart: unless-stopped
+    ports: [1025, 1080]
+    image: schickling/mailcatcher
+    networks:
+      - mini-sns-network
+  
+volumes:
+    redis:
+        driver: local
+    mongodb-data:
+        driver: local
+
+networks:
+    mini-sns-network:
+        driver: bridge
+        name: mini-sns-network

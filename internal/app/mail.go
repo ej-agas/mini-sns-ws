@@ -52,13 +52,7 @@ type Mail struct {
 	Data     interface{}
 }
 
-func NewMail(templatePath string, to []string, from, subject string, data interface{}) (*Mail, error) {
-	template, err := template.ParseFiles(templatePath)
-
-	if err != nil {
-		return nil, err
-	}
-
+func NewMail(template *template.Template, to []string, from, subject string, data interface{}) (*Mail, error) {
 	return &Mail{
 		Template: template,
 		To:       to,

@@ -1,4 +1,4 @@
-FROM golang:1.19-alpine AS builder
+FROM golang:1.20-alpine AS builder
 
 RUN /sbin/apk update && \
 	/sbin/apk --no-cache add ca-certificates git tzdata && \
@@ -10,8 +10,11 @@ WORKDIR /home/mini_sns_user
 COPY go.mod /home/mini_sns_user
 COPY go.sum /home/mini_sns_user
 COPY cmd    /home/mini_sns_user/cmd
+COPY internal /home/mini_sns_user/internal
 
 ARG VERSION
+
+RUN go mod download
 
 RUN CGO_ENABLED=0 go build -a -tags netgo,osusergo \
     -ldflags "-extldflags '-static' -s -w" \
