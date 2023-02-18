@@ -136,3 +136,13 @@ func (a *Argon2IDHasher) FromString(encodedHash string) (Argon2IDHash, error) {
 
 	return hash, nil
 }
+
+func NewDefaultArgon2IDHasher() *Argon2IDHasher {
+	return &Argon2IDHasher{Params: Argon2IDParams{
+		Memory:      64 * 1024,
+		Iterations:  3,
+		Parallelism: 4,
+		SaltLength:  16,
+		KeyLength:   32,
+	}}
+}

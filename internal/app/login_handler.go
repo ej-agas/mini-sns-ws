@@ -40,6 +40,10 @@ type loginInput struct {
 	Password string `json:"password" validate:"required,ascii"`
 }
 
+type loginResponse struct {
+	Message string `json:"token"`
+}
+
 func (handler *LoginHandler) login() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		input := loginInput{}
@@ -77,6 +81,6 @@ func (handler *LoginHandler) login() httprouter.Handle {
 			return
 		}
 
-		JSONResponse(w, Error{Message: jwtToken}, 200)
+		JSONResponse(w, loginResponse{Message: jwtToken}, 200)
 	}
 }

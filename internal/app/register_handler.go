@@ -2,10 +2,7 @@ package app
 
 import (
 	"encoding/json"
-	"html/template"
-	"log"
 	"mini-sns-ws/internal/domain"
-	"mini-sns-ws/internal/templates"
 	"net/http"
 	"time"
 
@@ -101,8 +98,7 @@ func (handler *RegisterUserHandler) register() httprouter.Handle {
 		}
 
 		randStr := GenerateRandomString(128)
-
-		if err := sendVerificationEmail(*handler.transport, user, randStr); err != nil {
+		if err := SendVerificationEmail(*handler.transport, user, randStr); err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)
 			return
 		}
@@ -115,31 +111,4 @@ func (handler *RegisterUserHandler) register() httprouter.Handle {
 
 		EmptyResponse(w, http.StatusCreated)
 	}
-}
-
-func sendVerificationEmail(transport MailTransport, user domain.User, verificationToken string) error {
-	data := struct {
-		Name string
-		URL  string
-	}{
-		Name: user.FullName(),
-		URL:  "http://localhost:6943/api/v1/verify?token=" + verificationToken,
-	}
-
-	mailTo := []string{user.Email}
-	subject := "Verify your account"
-
-	template := template.Must(template.New("layout").Parse(templates.VerifyAccount))
-	mail, err := NewMail(template, mailTo, "noreply@mini-sns.com", subject, data)
-
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	if err := transport.Send(mail); err != nil {
-		return err
-	}
-
-	return nil
 }

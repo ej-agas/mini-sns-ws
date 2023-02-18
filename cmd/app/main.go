@@ -32,13 +32,7 @@ func main() {
 	}
 
 	transport := app.NewMailTransport(mailCfg)
-	hasher := &app.Argon2IDHasher{Params: app.Argon2IDParams{
-		Memory:      64 * 1024,
-		Iterations:  3,
-		Parallelism: 4,
-		SaltLength:  16,
-		KeyLength:   32,
-	}}
+	hasher := app.NewDefaultArgon2IDHasher()
 
 	userRepository := mongodb.UserRepository{UserCollection: db.Collection("users")}
 	postRepository := mongodb.PostRepository{PostCollection: db.Collection("posts")}
@@ -47,10 +41,14 @@ func main() {
 	tokenService := app.JWTTokenService{SecretKey: os.Getenv("JWT_SECRET"), Expiry: 12 * time.Hour}
 	authMiddleware := app.AuthMiddleware{TokenService: tokenService, UserRepository: userRepository}
 
+	// User Handler
 	app.NewRegisterUserHandler(userRepository, hasher, transport, redis, validator, router)
-	app.NewVerifyUserHandler(userRepository, redis, router)
+	app.NewVerifyUserHandler(userRepository, tokenService, redis, router)
 	app.NewLoginHandler(userRepository, hasher, tokenService, validator, router)
 
+	//Followers Handler
+
+	// Post Handler
 	app.NewCreatePostHandler(authMiddleware, postRepository, validator, router)
 	app.NewGetPostsHandler(authMiddleware, postRepository, router)
 	app.NewGetPostHandler(authMiddleware, postRepository, router)

@@ -34,6 +34,10 @@ func (u *User) FullName() string {
 }
 
 func (u *User) Verify() {
+	if u.IsVerified {
+		return
+	}
+
 	now := time.Now()
 	u.IsVerified = true
 	u.VerifiedAt = primitive.NewDateTimeFromTime(now)

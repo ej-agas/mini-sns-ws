@@ -12,7 +12,7 @@ services:
         MAIL_PORT: 1025
         MAIL_USER:
         MAIL_PASSWORD:
-        JWT_SECRET:
+        JWT_SECRET: k@6bAn2^iuVZ5ML2ZtU*4xfZhU*2uk!P
         REDIS_HOST: mini-sns-redis
         REDIS_PORT: 6379
         REDIS_DB: 0

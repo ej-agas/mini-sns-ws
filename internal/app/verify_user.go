@@ -10,17 +10,20 @@ import (
 
 type VerifyUserHandler struct {
 	repo          domain.UserRepository
+	tokenService  TokenService
 	keyValueStore domain.KeyValueStore
 	router        *httprouter.Router
 }
 
 func NewVerifyUserHandler(
 	userRepo domain.UserRepository,
+	tokenService TokenService,
 	keyValueStore domain.KeyValueStore,
 	router *httprouter.Router,
 ) *VerifyUserHandler {
 	handler := &VerifyUserHandler{
 		repo:          userRepo,
+		tokenService:  tokenService,
 		keyValueStore: keyValueStore,
 		router:        router,
 	}
@@ -29,6 +32,11 @@ func NewVerifyUserHandler(
 
 	return handler
 }
+
+type verifyUserResponse struct {
+	Message string `json:"token"`
+}
+
 func (handler *VerifyUserHandler) verify() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		token := r.URL.Query().Get("token")
@@ -53,13 +61,20 @@ func (handler *VerifyUserHandler) verify() httprouter.Handle {
 		}
 
 		user.Verify()
+
 		if err := handler.repo.Save(r.Context(), user); err != nil {
 			JSONResponse(w, Error{fmt.Sprintf("Error verifying user: %s", err.Error())}, 400)
 			return
 		}
 
 		handler.keyValueStore.Delete(r.Context(), token)
+		jwtToken, err := handler.tokenService.GenerateFor(user)
 
-		EmptyResponse(w, 200)
+		if err != nil {
+			JSONResponse(w, Error{err.Error()}, 400)
+			return
+		}
+
+		JSONResponse(w, verifyUserResponse{jwtToken}, 200)
 	}
 }

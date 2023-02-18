@@ -24,6 +24,7 @@ func (service JWTTokenService) GenerateFor(user domain.User) (string, error) {
 	token, err := jwt.NewBuilder().
 		Issuer("mini-sns-ws").
 		Claim("user_id", user.ID.Hex()).
+		Claim("is_verified", user.IsVerified).
 		IssuedAt(now).
 		Expiration(time.Now().Add(service.Expiry)).
 		Build()

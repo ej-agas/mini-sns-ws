@@ -12,11 +12,12 @@ COPY go.sum /home/mini_sns_user
 COPY cmd    /home/mini_sns_user/cmd
 COPY internal /home/mini_sns_user/internal
 
+RUN go mod download
+COPY . .
+
 ARG VERSION
 
-RUN go mod download
-
-RUN CGO_ENABLED=0 go build -a -tags netgo,osusergo \
+RUN CGO_ENABLED=0 go build -a -tags netgo,osusergo -buildvcs=false \
     -ldflags "-extldflags '-static' -s -w" \
     -ldflags "-X main.version=$VERSION" -o mini_sns_app ./cmd/app
 
