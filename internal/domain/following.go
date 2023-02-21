@@ -1,17 +1,9 @@
 package domain
 
-import (
-	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Following struct {
-	ID     primitive.ObjectID               `bson:"_id" json:"id"`
-	UserId primitive.ObjectID               `bson:"user_id" json:"-"`
-	List   map[primitive.ObjectID]time.Time `bson:"list" json:"list"`
-}
-
-func (following *Following) Count() int {
-	return len(following.List)
+	Follower  primitive.ObjectID `bson:"follower" json:"follower"`
+	Following primitive.ObjectID `bson:"following" json:"following"`
+	CreatedAt primitive.DateTime `bson:"created_at" json:"created_at"`
 }
