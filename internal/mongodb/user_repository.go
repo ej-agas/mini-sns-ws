@@ -11,6 +11,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var (
+	ErrInvalidUserId = errors.New("mongodb: invalid user id")
+)
+
 type UserRepository struct {
 	UserCollection *mongo.Collection
 }
@@ -20,7 +24,7 @@ func (r UserRepository) Find(ctx context.Context, id string) (domain.User, error
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return user, errors.New("invalid ObjectID")
+		return user, ErrInvalidUserId
 	}
 
 	queryError := r.UserCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&user)

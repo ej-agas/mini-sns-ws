@@ -1,8 +1,12 @@
 package domain
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type FollowingRepository interface {
-	Follow(follower User, userToFollow primitive.ObjectID) error
-	Unfollow(follower User, userToUnfollow primitive.ObjectID) error
+	Follow(ctx context.Context, follower User, userToFollow primitive.ObjectID) error
+	Unfollow(ctx context.Context, follower User, userToUnfollow primitive.ObjectID) error
 }

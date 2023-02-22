@@ -11,6 +11,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var (
+	ErrInvalidPostId = errors.New("mongodb: invalid post id")
+)
+
 type PostRepository struct {
 	PostCollection *mongo.Collection
 }
@@ -20,7 +24,7 @@ func (r PostRepository) Find(ctx context.Context, id string) (domain.Post, error
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return post, errors.New("invalid ObjectID")
+		return post, ErrInvalidPostId
 	}
 
 	queryError := r.PostCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&post)
