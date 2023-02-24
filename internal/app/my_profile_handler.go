@@ -19,9 +19,31 @@ func NewMyProfileHandler(authMiddleware AuthMiddleware, router *httprouter.Route
 	return handler
 }
 
+type MyProfileResponse struct {
+	FullName     string `json:"full_name"`
+	Email        string `json:"email"`
+	IsVerified   bool   `json:"is_verified"`
+	VerifiedDate string `json:"verified_date,omitempty"`
+	JoinDate     string `json:"join_date"`
+}
+
 func (handler MyProfileHandler) Handle() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		user := (r.Context().Value(LoggedInUser)).(domain.User)
-		JSONResponse(w, user, 200)
+
+		var verifiedDate string
+		if user.VerifiedAt.Time().Unix() != 0 {
+			verifiedDate = user.VerifiedAt.Time().Format("January 2, 2006 3:04 PM MST")
+		}
+
+		response := MyProfileResponse{
+			FullName:     user.FullName(),
+			Email:        user.Email,
+			IsVerified:   user.IsVerified,
+			VerifiedDate: verifiedDate,
+			JoinDate:     user.CreatedAt.Time().Format("January 2, 2006 3:04 PM MST"),
+		}
+
+		JSONResponse(w, response, 200)
 	}
 }
