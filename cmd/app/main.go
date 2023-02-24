@@ -36,6 +36,7 @@ func main() {
 
 	userRepository := mongodb.UserRepository{UserCollection: db.Collection("users")}
 	postRepository := mongodb.PostRepository{PostCollection: db.Collection("posts")}
+	followingRepository := mongodb.FollowingRepository{FollowingCollection: db.Collection("following"), UserCollection: db.Collection("users")}
 
 	redis := redis.NewRedis(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), "", 0)
 	tokenService := app.JWTTokenService{SecretKey: os.Getenv("JWT_SECRET"), Expiry: 12 * time.Hour}
@@ -47,6 +48,7 @@ func main() {
 	app.NewLoginHandler(userRepository, hasher, tokenService, validator, router)
 
 	//Followers Handler
+	app.NewFollowUserHandler(authMiddleware, validator, followingRepository, router)
 
 	// Post Handler
 	app.NewCreatePostHandler(authMiddleware, postRepository, validator, router)

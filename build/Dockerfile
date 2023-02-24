@@ -7,12 +7,15 @@ RUN /sbin/apk update && \
 RUN adduser -D -g '' mini_sns_user
 WORKDIR /home/mini_sns_user
 
+
 COPY go.mod /home/mini_sns_user
 COPY go.sum /home/mini_sns_user
+
+RUN go mod download
+
 COPY cmd    /home/mini_sns_user/cmd
 COPY internal /home/mini_sns_user/internal
 
-RUN go mod download
 COPY . .
 
 ARG VERSION
