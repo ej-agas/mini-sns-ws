@@ -49,6 +49,7 @@ func main() {
 
 	//Followers Handler
 	app.NewFollowUserHandler(authMiddleware, validator, followingRepository, router)
+	app.NewUnfollowUserHandler(authMiddleware, validator, followingRepository, router)
 
 	// Post Handler
 	app.NewCreatePostHandler(authMiddleware, postRepository, validator, router)
@@ -56,6 +57,9 @@ func main() {
 	app.NewGetPostHandler(authMiddleware, postRepository, router)
 	app.NewUpdatePostHandler(authMiddleware, postRepository, validator, router)
 	app.NewDeletePostHandler(authMiddleware, postRepository, router)
+
+	// Profile Handler
+	app.NewMyProfileHandler(authMiddleware, router)
 
 	log.Printf("version %s listening on port %s", version, port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

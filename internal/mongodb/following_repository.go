@@ -12,10 +12,9 @@ import (
 )
 
 var (
-	ErrAlreadyFollowingUser           = errors.New("mongodb: aready following user")
-	ErrUserToFollowDoesNotExist       = errors.New("mongodb: user to follow does not exist")
-	ErrUserToUnfollowDoesNotExist     = errors.New("mongodb: user to unfollow does not exist")
-	ErrCannotUnfollowNotFollowingUser = errors.New("mongodb: you cannot unfollow someone you're not following")
+	ErrAlreadyFollowingUser       = errors.New("mongodb: aready following user")
+	ErrUserToFollowDoesNotExist   = errors.New("mongodb: user to follow does not exist")
+	ErrUserToUnfollowDoesNotExist = errors.New("mongodb: user to unfollow does not exist")
 )
 
 type FollowingRepository struct {
@@ -51,7 +50,7 @@ func (repository FollowingRepository) Follow(ctx context.Context, follower domai
 
 func (repository FollowingRepository) Unfollow(ctx context.Context, follower domain.User, userToUnfollow primitive.ObjectID) error {
 	if _, err := repository.FollowingCollection.DeleteOne(ctx, bson.M{"follower": follower.ID, "following": userToUnfollow}); err != nil {
-		return ErrCannotUnfollowNotFollowingUser
+		return err
 	}
 
 	return nil

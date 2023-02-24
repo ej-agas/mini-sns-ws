@@ -14,7 +14,7 @@ type User struct {
 	MiddleName string             `bson:"middle_name" json:"middle_name"`
 	LastName   string             `bson:"last_name" json:"last_name"`
 	Email      string             `bson:"email" json:"email"`
-	Password   string             `bson:"password" json:"password"`
+	Password   string             `bson:"password" json:"-"`
 	IsVerified bool               `bson:"is_verified" json:"is_verified"`
 	VerifiedAt primitive.DateTime `bson:"verified_at,omitempty" json:"verified_at,omitempty"`
 	CreatedAt  primitive.DateTime `bson:"created_at" json:"created_at"`

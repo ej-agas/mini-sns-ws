@@ -23,19 +23,29 @@ services:
         - "6943:6943"
       networks: 
         - mini-sns-network
+      deploy:
+        resources:
+            limits:
+              cpus: '1'
+              memory: 128M
   redis:
-    image: redis:7-alpine
-    container_name: mini-sns-redis
-    restart: unless-stopped
-    tty: true
-    ports:
-      - 7001:6379
-    volumes:
-      - redis:/data
-    networks:
-      - mini-sns-network
+      image: redis:7-alpine
+      container_name: mini-sns-redis
+      restart: unless-stopped
+      tty: true
+      ports:
+        - 7001:6379
+      volumes:
+        - redis:/data
+      networks:
+        - mini-sns-network
+      deploy:
+        resources:
+            limits:
+              cpus: '1'
+              memory: 128M
   mongodb:
-      image: mongo-express:1.0.0-alpha.4
+      image: mongo
       container_name: mini-sns-mongodb
       restart: unless-stopped
       tty: true
@@ -48,6 +58,11 @@ services:
         - mini-sns-network
       volumes:
         - mongodb-data:/var/mongodb-data
+      deploy:
+        resources:
+            limits:
+              cpus: '1'
+              memory: 256M
   mailcatcher:
     container_name: mini-sns-mail
     restart: unless-stopped
@@ -55,7 +70,11 @@ services:
     image: schickling/mailcatcher
     networks:
       - mini-sns-network
-  
+    deploy:
+      resources:
+          limits:
+            cpus: '1'
+            memory: 256M
 volumes:
     redis:
         driver: local
