@@ -50,6 +50,7 @@ func main() {
 	//Followers Handler
 	app.NewFollowUserHandler(authMiddleware, validator, followingRepository, router)
 	app.NewUnfollowUserHandler(authMiddleware, validator, followingRepository, router)
+	app.NewGetFollowingHandler(authMiddleware, followingRepository, router)
 
 	// Post Handler
 	app.NewCreatePostHandler(authMiddleware, postRepository, validator, router)

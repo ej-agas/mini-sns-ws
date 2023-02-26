@@ -28,16 +28,26 @@ type Argon2IDHash struct {
 	Value   []byte
 }
 
-func (h Argon2IDHash) String() string {
+func (hash Argon2IDHash) String() string {
 	return fmt.Sprintf(
 		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
-		h.Version,
-		h.Params.Memory,
-		h.Params.Iterations,
-		h.Params.Parallelism,
-		base64.RawStdEncoding.EncodeToString(h.Salt),
-		base64.RawStdEncoding.EncodeToString(h.Value),
+		hash.Version,
+		hash.Params.Memory,
+		hash.Params.Iterations,
+		hash.Params.Parallelism,
+		base64.RawStdEncoding.EncodeToString(hash.Salt),
+		base64.RawStdEncoding.EncodeToString(hash.Value),
 	)
+}
+
+func (hash Argon2IDHash) Create(params Argon2IDParams, version int, salt []byte, value string) *Argon2IDHash {
+	instance := &Argon2IDHash{}
+	instance.Params = params
+	instance.Version = version
+	instance.Salt = salt
+	instance.Value = argon2.IDKey([]byte(value), salt, params.Iterations, params.Memory, params.Parallelism, params.KeyLength)
+
+	return instance
 }
 
 type Argon2IDParams struct {
@@ -52,19 +62,14 @@ type Argon2IDHasher struct {
 	Params Argon2IDParams
 }
 
-func (a *Argon2IDHasher) Hash(text string) (string, error) {
-	argon2IDHash := &Argon2IDHash{}
-	salt, err := a.makeSalt()
+func (hasher *Argon2IDHasher) Hash(text string) (string, error) {
+	salt, err := hasher.makeSalt()
 	if err != nil {
 		return "", err
 	}
 
-	argon2IDHash.Params = a.Params
-	argon2IDHash.Version = argon2.Version
-	argon2IDHash.Salt = salt
-	argon2IDHash.Value = argon2.IDKey([]byte(text), salt, a.Params.Iterations, a.Params.Memory, a.Params.Parallelism, a.Params.KeyLength)
-
-	return argon2IDHash.String(), nil
+	hash := Argon2IDHash{}.Create(hasher.Params, argon2.Version, salt, text)
+	return hash.String(), nil
 }
 
 func (a *Argon2IDHasher) makeSalt() ([]byte, error) {

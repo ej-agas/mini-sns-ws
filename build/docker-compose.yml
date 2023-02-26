@@ -26,8 +26,8 @@ services:
       deploy:
         resources:
             limits:
-              cpus: '1'
-              memory: 128M
+              cpus: '4'
+              memory: 1G
   redis:
       image: redis:7-alpine
       container_name: mini-sns-redis

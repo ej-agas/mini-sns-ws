@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"mini-sns-ws/internal/domain"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -36,12 +35,7 @@ func (repository FollowingRepository) Follow(ctx context.Context, follower domai
 		return ErrAlreadyFollowingUser
 	}
 
-	following.ID = primitive.NewObjectID()
-	following.Follower = follower.ID
-	following.Following = userToFollow
-	following.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
-
-	if _, err := repository.FollowingCollection.InsertOne(ctx, following); err != nil {
+	if _, err := repository.FollowingCollection.InsertOne(ctx, following.Create(follower.ID, userToFollow)); err != nil {
 		return err
 	}
 
@@ -54,4 +48,26 @@ func (repository FollowingRepository) Unfollow(ctx context.Context, follower dom
 	}
 
 	return nil
+}
+
+func (repository FollowingRepository) Following(ctx context.Context, user domain.User) ([]domain.Following, error) {
+	var results []domain.Following
+
+	cursor, err := repository.FollowingCollection.Find(ctx, bson.M{"follower": user.ID})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
+func (repository FollowingRepository) Followers(ctx context.Context, user domain.User) ([]domain.Following, error) {
+	var results []domain.Following
+
+	return results, nil
 }

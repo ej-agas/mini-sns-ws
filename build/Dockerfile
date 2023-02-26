@@ -33,6 +33,5 @@ COPY --from=builder /home/mini_sns_user/mini_sns_app /home/mini_sns_app
 
 USER mini_sns_user
 WORKDIR /home
-EXPOSE 8081
 
 ENTRYPOINT ["/home/mini_sns_app"]
