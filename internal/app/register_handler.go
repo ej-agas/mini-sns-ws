@@ -12,11 +12,11 @@ import (
 )
 
 type registerInput struct {
-	First_name  string `json:"first_name" validate:"required,alpha"`
-	Middle_name string `json:"middle_name" validate:"omitempty,alpha"`
-	Last_name   string `json:"last_name" validate:"required,alpha"`
+	First_name  string `json:"first_name" validate:"required"`
+	Middle_name string `json:"middle_name" validate:"omitempty"`
+	Last_name   string `json:"last_name" validate:"required"`
 	Email       string `json:"email" validate:"required,email"`
-	Password    string `json:"password" validate:"required,ascii"`
+	Password    string `json:"password" validate:"required,ascii,gte=8"`
 }
 
 type RegisterUserHandler struct {

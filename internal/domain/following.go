@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"encoding/json"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,4 +22,18 @@ func (f Following) Create(followerId primitive.ObjectID, followingId primitive.O
 		Following: followerId,
 		CreatedAt: primitive.NewDateTimeFromTime(now),
 	}
+}
+
+func (f Following) Id() string {
+	return f.ID.String()
+}
+
+func (f Following) String() string {
+	result, err := json.Marshal(f)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return string(result)
 }

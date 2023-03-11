@@ -69,5 +69,15 @@ func (repository FollowingRepository) Following(ctx context.Context, user domain
 func (repository FollowingRepository) Followers(ctx context.Context, user domain.User) ([]domain.Following, error) {
 	var results []domain.Following
 
+	cursor, err := repository.FollowingCollection.Find(ctx, bson.M{"following": user.ID})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
 	return results, nil
 }
