@@ -10,10 +10,11 @@ import (
 )
 
 type updateMyProfileInput struct {
-	First_name  string `json:"first_name" validate:"omitempty"`
-	Middle_name string `json:"middle_name" validate:"omitempty"`
-	Last_name   string `json:"last_name" validate:"omitempty"`
-	Password    string `json:"password" validate:"omitempty,ascii,gte=8"`
+	First_name  *string `json:"first_name" validate:"omitempty"`
+	Middle_name *string `json:"middle_name" validate:"omitempty"`
+	Last_name   *string `json:"last_name" validate:"omitempty"`
+	Bio         *string `json:"bio" validate:"omitempty"`
+	Password    *string `json:"password" validate:"omitempty,ascii,gte=8"`
 }
 
 type UpdateMyProfileHandler struct {
@@ -34,6 +35,7 @@ func NewUpdateMyProfileHandler(authMiddleware AuthMiddleware, hasher Hasher, val
 type UpdateMyProfileResponse struct {
 	FullName     string `json:"full_name"`
 	Email        string `json:"email"`
+	Bio          string `json:"bio"`
 	IsVerified   bool   `json:"is_verified"`
 	VerifiedDate string `json:"verified_date,omitempty"`
 	JoinDate     string `json:"join_date"`
@@ -51,25 +53,29 @@ func (handler UpdateMyProfileHandler) Handle() httprouter.Handle {
 		}
 		user := (r.Context().Value(LoggedInUser)).(domain.User)
 
-		if input.First_name != "" {
-			user.FirstName = input.First_name
+		if input.First_name != nil {
+			user.FirstName = *input.First_name
 		}
 
-		if input.Middle_name != "" {
-			user.MiddleName = input.Middle_name
+		if input.Middle_name != nil {
+			user.MiddleName = *input.Middle_name
 		}
 
-		if input.Last_name != "" {
-			user.LastName = input.Last_name
+		if input.Last_name != nil {
+			user.LastName = *input.Last_name
 		}
 
-		if input.Password != "" {
-			hashedPassword, err := handler.hasher.Hash(input.Password)
+		if input.Password != nil {
+			hashedPassword, err := handler.hasher.Hash(*input.Password)
 			if err != nil {
 				JSONResponse(w, Error{err.Error()}, 500)
 				return
 			}
 			user.Password = hashedPassword
+		}
+
+		if input.Bio != nil {
+			user.Bio = *input.Bio
 		}
 
 		if err := handler.userRepo.Save(r.Context(), user); err != nil {
