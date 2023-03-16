@@ -63,6 +63,9 @@ func main() {
 	app.NewMyProfileHandler(authMiddleware, router)
 	app.NewUpdateMyProfileHandler(authMiddleware, hasher, validator, userRepository, router)
 
+	// Feed Handler
+	app.NewFeedHandler(authMiddleware, postRepository, followingRepository, router)
+
 	log.Printf("version %s listening on port %s", version, port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }

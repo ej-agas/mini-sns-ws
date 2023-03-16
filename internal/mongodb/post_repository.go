@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"mini-sns-ws/internal/domain"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -62,6 +63,50 @@ func (r PostRepository) FindOneBy(ctx context.Context, filter domain.Filter) (do
 	}
 
 	return post, nil
+}
+
+func (r PostRepository) CreateFeed(ctx context.Context, ids []string, cursor string) ([]domain.Post, error) {
+	var posts []domain.Post
+	var userIds []primitive.ObjectID
+
+	for _, v := range ids {
+		userId, err := primitive.ObjectIDFromHex(v)
+		if err != nil {
+			return nil, fmt.Errorf("Database Error: invalid id: %s", err.Error())
+		}
+
+		userIds = append(userIds, userId)
+	}
+
+	if cursor == "" {
+		mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}})
+
+		if err != nil {
+			return nil, fmt.Errorf("Database Error: failed to create feed: %s", err.Error())
+		}
+
+		if err := mongoCursor.All(ctx, &posts); err != nil {
+			return nil, fmt.Errorf("Database Error: failed to decode feed results: %s", err.Error())
+		}
+
+		return posts, nil
+	}
+
+	cursorId, err := primitive.ObjectIDFromHex(cursor)
+	if err != nil {
+		return nil, fmt.Errorf("Database Error: invalid cursor id: %s", err.Error())
+	}
+	mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}, "_id": bson.M{"$gte": cursorId}})
+
+	if err != nil {
+		return nil, fmt.Errorf("Database Error: failed to create feed: %s", err.Error())
+	}
+
+	if err := mongoCursor.All(ctx, &posts); err != nil {
+		return nil, fmt.Errorf("Database Error: failed to decode feed results: %s", err.Error())
+	}
+
+	return posts, nil
 }
 
 func (r PostRepository) Save(ctx context.Context, m domain.Post) error {

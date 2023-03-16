@@ -24,7 +24,8 @@ func (middleware *AuthMiddleware) Handle(next httprouter.Handle) httprouter.Hand
 		bearerToken := r.Header.Get("Authorization")
 
 		if bearerToken == "" {
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			w.Header().Add("Connection", "close")
+			w.WriteHeader(401)
 			return
 		}
 
