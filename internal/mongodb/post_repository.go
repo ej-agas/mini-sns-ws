@@ -66,7 +66,7 @@ func (r PostRepository) FindOneBy(ctx context.Context, filter domain.Filter) (do
 }
 
 func (r PostRepository) CreateFeed(ctx context.Context, ids []string, cursor string) ([]domain.Post, error) {
-	var posts []domain.Post
+	posts := make([]domain.Post, 0)
 	var userIds []primitive.ObjectID
 
 	for _, v := range ids {
@@ -79,7 +79,7 @@ func (r PostRepository) CreateFeed(ctx context.Context, ids []string, cursor str
 	}
 
 	if cursor == "" {
-		mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}})
+		mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}}, options.Find().SetLimit(25))
 
 		if err != nil {
 			return nil, fmt.Errorf("Database Error: failed to create feed: %s", err.Error())
@@ -96,7 +96,7 @@ func (r PostRepository) CreateFeed(ctx context.Context, ids []string, cursor str
 	if err != nil {
 		return nil, fmt.Errorf("Database Error: invalid cursor id: %s", err.Error())
 	}
-	mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}, "_id": bson.M{"$gte": cursorId}})
+	mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}, "_id": bson.M{"$gt": cursorId}}, options.Find().SetLimit(25))
 
 	if err != nil {
 		return nil, fmt.Errorf("Database Error: failed to create feed: %s", err.Error())

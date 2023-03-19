@@ -16,6 +16,10 @@ type FeedHandler struct {
 	router         *httprouter.Router
 }
 
+type FeedData struct {
+	Data []domain.Post `json:"data"`
+}
+
 func NewFeedHandler(authMiddleware AuthMiddleware, postRepo domain.PostRepository, followingRepo domain.FollowingRepository, router *httprouter.Router) *FeedHandler {
 	handler := &FeedHandler{authMiddleware: authMiddleware, postRepo: postRepo, followingRepo: followingRepo, router: router}
 	handler.router.GET("/api/v1/feed", handler.authMiddleware.Handle(handler.Handle()))
@@ -62,6 +66,8 @@ func (handler FeedHandler) Handle() httprouter.Handle {
 			return
 		}
 
-		JSONResponse(w, feed, 200)
+		data := FeedData{feed}
+
+		JSONResponse(w, data, 200)
 	}
 }
