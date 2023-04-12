@@ -24,15 +24,15 @@ func NewLoginHandler(
 	validator *validator.Validate,
 	r *httprouter.Router,
 ) *LoginHandler {
-	h := &LoginHandler{
+	handler := &LoginHandler{
 		repo:         userRepo,
 		hasher:       hasher,
 		tokenService: tokenService,
 		validator:    validator,
 		router:       r,
 	}
-	h.router.POST("/api/v1/login", h.login())
-	return h
+	handler.router.POST("/api/v1/login", CORS(handler.login()))
+	return handler
 }
 
 type loginInput struct {
