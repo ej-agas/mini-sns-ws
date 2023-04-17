@@ -14,7 +14,7 @@ type MyProfileHandler struct {
 
 func NewMyProfileHandler(authMiddleware AuthMiddleware, router *httprouter.Router) *MyProfileHandler {
 	handler := &MyProfileHandler{authMiddleware: authMiddleware, router: router}
-	handler.router.GET("/api/v1/my-profile", handler.authMiddleware.Handle(handler.Handle()))
+	handler.router.GET("/api/v1/my-profile", CORS(handler.authMiddleware.Handle(handler.Handle())))
 
 	return handler
 }
