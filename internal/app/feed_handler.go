@@ -22,7 +22,7 @@ type FeedData struct {
 
 func NewFeedHandler(authMiddleware AuthMiddleware, postRepo domain.PostRepository, followingRepo domain.FollowingRepository, router *httprouter.Router) *FeedHandler {
 	handler := &FeedHandler{authMiddleware: authMiddleware, postRepo: postRepo, followingRepo: followingRepo, router: router}
-	handler.router.GET("/api/v1/feed", handler.authMiddleware.Handle(handler.Handle()))
+	handler.router.GET("/api/v1/feed", CORS(handler.authMiddleware.Handle(handler.Handle())))
 
 	return handler
 }
