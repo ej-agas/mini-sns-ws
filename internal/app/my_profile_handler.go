@@ -21,6 +21,9 @@ func NewMyProfileHandler(authMiddleware AuthMiddleware, router *httprouter.Route
 
 type MyProfileResponse struct {
 	FullName     string `json:"full_name"`
+	FirstName    string `json:"first_name"`
+	MiddleName   string `json:"middle_name"`
+	LastName     string `json:"last_name"`
 	Bio          string `json:"bio"`
 	Email        string `json:"email"`
 	IsVerified   bool   `json:"is_verified"`
@@ -39,6 +42,9 @@ func (handler MyProfileHandler) Handle() httprouter.Handle {
 
 		response := MyProfileResponse{
 			FullName:     user.FullName(),
+			FirstName:    user.FirstName,
+			MiddleName:   user.MiddleName,
+			LastName:     user.LastName,
 			Bio:          user.Bio,
 			Email:        user.Email,
 			IsVerified:   user.IsVerified,
