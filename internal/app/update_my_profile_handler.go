@@ -27,7 +27,7 @@ type UpdateMyProfileHandler struct {
 
 func NewUpdateMyProfileHandler(authMiddleware AuthMiddleware, hasher Hasher, validator *validator.Validate, userRepo domain.UserRepository, router *httprouter.Router) *UpdateMyProfileHandler {
 	handler := &UpdateMyProfileHandler{authMiddleware: authMiddleware, hasher: hasher, validator: validator, userRepo: userRepo, router: router}
-	handler.router.PATCH("/api/v1/my-profile", handler.authMiddleware.Handle(handler.Handle()))
+	handler.router.PATCH("/api/v1/my-profile", CORS(handler.authMiddleware.Handle(handler.Handle())))
 
 	return handler
 }
