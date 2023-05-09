@@ -40,7 +40,10 @@ func (r PostRepository) Find(ctx context.Context, id string) (domain.Post, error
 func (r PostRepository) FindBy(ctx context.Context, filter domain.Filter) ([]domain.Post, error) {
 	var results []domain.Post
 
-	cursor, err := r.PostCollection.Find(ctx, filter)
+	opts := options.Find()
+	opts.SetSort(bson.M{"created_at": 1})
+
+	cursor, err := r.PostCollection.Find(ctx, filter, opts)
 
 	if err != nil {
 		return nil, err
@@ -72,7 +75,7 @@ func (r PostRepository) CreateFeed(ctx context.Context, ids []string, cursor str
 	for _, v := range ids {
 		userId, err := primitive.ObjectIDFromHex(v)
 		if err != nil {
-			return nil, fmt.Errorf("Database Error: invalid id: %s", err.Error())
+			return nil, fmt.Errorf("database Error: invalid id: %s", err.Error())
 		}
 
 		userIds = append(userIds, userId)
@@ -82,11 +85,11 @@ func (r PostRepository) CreateFeed(ctx context.Context, ids []string, cursor str
 		mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}}, options.Find().SetLimit(25))
 
 		if err != nil {
-			return nil, fmt.Errorf("Database Error: failed to create feed: %s", err.Error())
+			return nil, fmt.Errorf("database Error: failed to create feed: %s", err.Error())
 		}
 
 		if err := mongoCursor.All(ctx, &posts); err != nil {
-			return nil, fmt.Errorf("Database Error: failed to decode feed results: %s", err.Error())
+			return nil, fmt.Errorf("database Error: failed to decode feed results: %s", err.Error())
 		}
 
 		return posts, nil
@@ -94,16 +97,16 @@ func (r PostRepository) CreateFeed(ctx context.Context, ids []string, cursor str
 
 	cursorId, err := primitive.ObjectIDFromHex(cursor)
 	if err != nil {
-		return nil, fmt.Errorf("Database Error: invalid cursor id: %s", err.Error())
+		return nil, fmt.Errorf("database Error: invalid cursor id: %s", err.Error())
 	}
 	mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}, "_id": bson.M{"$gt": cursorId}}, options.Find().SetLimit(25))
 
 	if err != nil {
-		return nil, fmt.Errorf("Database Error: failed to create feed: %s", err.Error())
+		return nil, fmt.Errorf("database Error: failed to create feed: %s", err.Error())
 	}
 
 	if err := mongoCursor.All(ctx, &posts); err != nil {
-		return nil, fmt.Errorf("Database Error: failed to decode feed results: %s", err.Error())
+		return nil, fmt.Errorf("database Error: failed to decode feed results: %s", err.Error())
 	}
 
 	return posts, nil

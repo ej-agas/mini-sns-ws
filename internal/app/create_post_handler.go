@@ -25,7 +25,7 @@ type CreatePostHandler struct {
 
 func NewCreatePostHandler(authMiddleware AuthMiddleware, userRepo domain.PostRepository, validator *validator.Validate, router *httprouter.Router) *CreatePostHandler {
 	handler := &CreatePostHandler{authMiddleware: authMiddleware, repo: userRepo, validator: validator, router: router}
-	handler.router.POST("/api/v1/posts", handler.authMiddleware.Handle(handler.CreatePost()))
+	handler.router.POST("/api/v1/posts", CORS(handler.authMiddleware.Handle(handler.CreatePost())))
 
 	return handler
 }
