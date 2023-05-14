@@ -15,7 +15,7 @@ type GetPostsHandler struct {
 
 func NewGetPostsHandler(authMiddleware AuthMiddleware, repo domain.PostRepository, router *httprouter.Router) *GetPostsHandler {
 	handler := &GetPostsHandler{authMiddlerware: authMiddleware, repo: repo, router: router}
-	handler.router.GET("/api/v1/posts", handler.authMiddlerware.Handle(handler.GetPosts()))
+	handler.router.GET("/api/v1/posts", CORS(handler.authMiddlerware.Handle(handler.GetPosts())))
 
 	return handler
 }
