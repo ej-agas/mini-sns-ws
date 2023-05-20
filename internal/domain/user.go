@@ -13,6 +13,7 @@ type User struct {
 	FirstName  string             `bson:"first_name" json:"first_name"`
 	MiddleName string             `bson:"middle_name" json:"middle_name"`
 	LastName   string             `bson:"last_name" json:"last_name"`
+	Username   string             `bson:"username" json:"username"`
 	Bio        string             `bson:"bio" json:"bio"`
 	Email      string             `bson:"email" json:"email"`
 	Password   string             `bson:"password" json:"-"`

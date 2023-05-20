@@ -64,6 +64,28 @@ func (r UserRepository) FindOneBy(ctx context.Context, field string, value inter
 	return user, nil
 }
 
+func (r UserRepository) Search(ctx context.Context, query string) ([]domain.User, error) {
+	var results []domain.User
+
+	filter := bson.M{
+		"$text": []bson.M{
+			{"$search": query},
+		},
+	}
+
+	cursor, err := r.UserCollection.Find(ctx, filter)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
 func (r UserRepository) Save(ctx context.Context, m domain.User) error {
 	_, err := r.UserCollection.UpdateOne(ctx, bson.D{{Key: "_id", Value: m.ID}}, bson.M{"$set": m}, options.Update().SetUpsert(true))
 

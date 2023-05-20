@@ -59,6 +59,9 @@ func main() {
 	app.NewVerifyUserHandler(userRepository, tokenService, redis, router)
 	app.NewLoginHandler(userRepository, hasher, tokenService, validator, router)
 
+	// Search Users
+	app.NewSearchUsersHandler(authMiddleware, userRepository, router)
+
 	//Followers Handler
 	app.NewFollowUserHandler(authMiddleware, validator, followingRepository, router)
 	app.NewUnfollowUserHandler(authMiddleware, validator, followingRepository, router)
