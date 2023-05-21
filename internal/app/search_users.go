@@ -49,6 +49,13 @@ func (handler *SearchUsersHandler) Handle() httprouter.Handle {
 			return
 		}
 
-		JSONResponse(w, searchUserResponse{results}, 200)
+		if len(results) == 0 {
+			JSONResponse(w, res, 200)
+			return
+		}
+
+		res.Users = results
+
+		JSONResponse(w, res, 200)
 	}
 }
