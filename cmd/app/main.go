@@ -73,6 +73,7 @@ func main() {
 	app.NewGetPostHandler(authMiddleware, postRepository, router)
 	app.NewUpdatePostHandler(authMiddleware, postRepository, validator, router)
 	app.NewDeletePostHandler(authMiddleware, postRepository, router)
+	app.NewGetUserPostsHandler(authMiddleware, postRepository, router)
 
 	// Profile Handler
 	app.NewMyProfileHandler(authMiddleware, router)

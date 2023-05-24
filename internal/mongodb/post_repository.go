@@ -20,7 +20,7 @@ type PostRepository struct {
 	PostCollection *mongo.Collection
 }
 
-func (r PostRepository) Find(ctx context.Context, id string) (domain.Post, error) {
+func (r PostRepository) FindOne(ctx context.Context, id string) (domain.Post, error) {
 	post := domain.Post{}
 	objId, err := primitive.ObjectIDFromHex(id)
 
@@ -37,11 +37,21 @@ func (r PostRepository) Find(ctx context.Context, id string) (domain.Post, error
 	return post, nil
 }
 
-func (r PostRepository) FindBy(ctx context.Context, filter domain.Filter) ([]domain.Post, error) {
+func (r PostRepository) FindBy(ctx context.Context, filter domain.Filter, findOpts domain.FindOptions) ([]domain.Post, error) {
 	var results []domain.Post
 
 	opts := options.Find()
-	opts.SetSort(bson.M{"created_at": 1})
+
+	sort := bson.D{}
+
+	for field, order := range findOpts.Sort {
+		sort = append(sort, bson.E{Key: field, Value: order})
+	}
+
+	opts.SetSort(sort)
+	opts.SetLimit(findOpts.Limit)
+
+	fmt.Println(opts)
 
 	cursor, err := r.PostCollection.Find(ctx, filter, opts)
 
@@ -52,6 +62,8 @@ func (r PostRepository) FindBy(ctx context.Context, filter domain.Filter) ([]dom
 	if err = cursor.All(ctx, &results); err != nil {
 		return nil, err
 	}
+
+	fmt.Println(results)
 
 	return results, nil
 }

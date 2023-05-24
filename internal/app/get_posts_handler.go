@@ -26,7 +26,7 @@ func (handler GetPostsHandler) GetPosts() httprouter.Handle {
 
 		filter := domain.NewFilter()
 		filter["user_id"] = user.ID
-		result, err := handler.repo.FindBy(r.Context(), filter)
+		result, err := handler.repo.FindBy(r.Context(), filter, *domain.NewFindOptions())
 
 		if err != nil {
 			EmptyResponse(w, 404)
