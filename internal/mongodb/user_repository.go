@@ -36,10 +36,20 @@ func (r UserRepository) Find(ctx context.Context, id string) (domain.User, error
 	return user, nil
 }
 
-func (r UserRepository) FindBy(ctx context.Context, field string, value interface{}) ([]domain.User, error) {
+func (r UserRepository) FindBy(ctx context.Context, filter domain.Filter, findOpts domain.FindOptions) ([]domain.User, error) {
 	var results []domain.User
 
-	cursor, err := r.UserCollection.Find(ctx, bson.D{{Key: field, Value: value}})
+	opts := options.Find()
+	sort := bson.D{}
+
+	for field, order := range findOpts.Sort {
+		sort = append(sort, bson.E{Key: field, Value: order})
+	}
+
+	opts.SetSort(sort)
+	opts.SetLimit(findOpts.Limit)
+
+	cursor, err := r.UserCollection.Find(ctx, filter, opts)
 
 	if err != nil {
 		return nil, err
@@ -52,10 +62,10 @@ func (r UserRepository) FindBy(ctx context.Context, field string, value interfac
 	return results, nil
 }
 
-func (r UserRepository) FindOneBy(ctx context.Context, field string, value interface{}) (domain.User, error) {
+func (r UserRepository) FindOneBy(ctx context.Context, filter domain.Filter, findOpts domain.FindOptions) (domain.User, error) {
 	var user domain.User
 
-	result := r.UserCollection.FindOne(ctx, bson.D{{Key: field, Value: value}})
+	result := r.UserCollection.FindOne(ctx, filter)
 
 	if err := result.Decode(&user); err != nil {
 		return user, err

@@ -60,7 +60,10 @@ func (handler *RegisterUserHandler) register() httprouter.Handle {
 			return
 		}
 
-		users, err := handler.repo.FindBy(r.Context(), "email", input.Email)
+		filter := domain.NewFilter()
+		filter["email"] = input.Email
+
+		users, err := handler.repo.FindBy(r.Context(), filter, *domain.NewFindOptions())
 
 		if err != nil {
 			JSONResponse(w, err, http.StatusBadRequest)

@@ -51,8 +51,6 @@ func (r PostRepository) FindBy(ctx context.Context, filter domain.Filter, findOp
 	opts.SetSort(sort)
 	opts.SetLimit(findOpts.Limit)
 
-	fmt.Println(opts)
-
 	cursor, err := r.PostCollection.Find(ctx, filter, opts)
 
 	if err != nil {

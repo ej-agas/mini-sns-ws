@@ -53,7 +53,10 @@ func (handler GetFollowingHandler) Handle() httprouter.Handle {
 			followingIds = append(followingIds, following.Following)
 		}
 
-		users, err := handler.userRepo.FindBy(r.Context(), "_id", bson.M{"$in": followingIds})
+		filter := domain.NewFilter()
+		filter["_id"] = bson.M{"$in": followingIds}
+
+		users, err := handler.userRepo.FindBy(r.Context(), filter, *domain.NewFindOptions())
 
 		if err != nil {
 			JSONResponse(w, Error{err.Error()}, 500)

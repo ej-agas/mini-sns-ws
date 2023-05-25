@@ -55,7 +55,10 @@ func (handler *LoginHandler) login() httprouter.Handle {
 			return
 		}
 
-		user, err := handler.repo.FindOneBy(r.Context(), "email", input.Email)
+		filter := domain.NewFilter()
+		filter["email"] = input.Email
+
+		user, err := handler.repo.FindOneBy(r.Context(), filter, *domain.NewFindOptions())
 
 		if err != nil {
 			JSONResponse(w, Error{Message: "User not found."}, 400)

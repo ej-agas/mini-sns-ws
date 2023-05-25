@@ -64,7 +64,10 @@ func (middleware *AuthMiddleware) Handle(next httprouter.Handle) httprouter.Hand
 			return
 		}
 
-		user, err := middleware.UserRepository.FindOneBy(ctx, "_id", userObjectId)
+		filter := domain.NewFilter()
+		filter["_id"] = userObjectId
+
+		user, err := middleware.UserRepository.FindOneBy(ctx, filter, *domain.NewFindOptions())
 
 		if err != nil {
 			JSONResponse(w, Error{Message: "User not found"}, 401)
