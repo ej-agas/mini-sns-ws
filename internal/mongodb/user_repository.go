@@ -77,7 +77,10 @@ func (r UserRepository) FindOneBy(ctx context.Context, filter domain.Filter, fin
 func (r UserRepository) Search(ctx context.Context, query string) ([]domain.User, error) {
 	var results []domain.User
 
-	cursor, err := r.UserCollection.Find(ctx, bson.M{"$text": bson.M{"$search": query}})
+	opts := options.Find()
+	opts.SetLimit(25)
+
+	cursor, err := r.UserCollection.Find(ctx, bson.M{"$text": bson.M{"$search": query}}, opts)
 
 	if err != nil {
 		return nil, err

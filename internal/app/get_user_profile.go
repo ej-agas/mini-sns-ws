@@ -40,7 +40,7 @@ func (handler UserProfileHandler) Handle() httprouter.Handle {
 
 		userId, err := primitive.ObjectIDFromHex(ps.ByName("id"))
 		if err != nil {
-			JSONResponse(w, Error{ErrInvalidUserId.Error()}, 422)
+			EmptyResponse(w, 404)
 			return
 		}
 
