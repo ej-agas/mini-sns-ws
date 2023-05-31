@@ -40,7 +40,19 @@ func (handler UserProfileHandler) Handle() httprouter.Handle {
 
 		userId, err := primitive.ObjectIDFromHex(ps.ByName("id"))
 		if err != nil {
-			EmptyResponse(w, 404)
+
+			filter := domain.NewFilter()
+			filter["username"] = ps.ByName("id")
+
+			user, err := handler.userRepo.FindOneBy(r.Context(), filter, *domain.NewFindOptions())
+
+			if err != nil {
+				JSONResponse(w, Error{err.Error()}, 422)
+				return
+			}
+
+			JSONResponse(w, createProfileResponse(user), 200)
+
 			return
 		}
 
@@ -54,23 +66,25 @@ func (handler UserProfileHandler) Handle() httprouter.Handle {
 			return
 		}
 
-		var verifiedDate string
-		if user.VerifiedAt.Time().Unix() != 0 {
-			verifiedDate = user.VerifiedAt.Time().Format(humanDateFormat)
-		}
+		JSONResponse(w, createProfileResponse(user), 200)
+	}
+}
 
-		response := MyProfileResponse{
-			FullName:     user.FullName(),
-			FirstName:    user.FirstName,
-			MiddleName:   user.MiddleName,
-			LastName:     user.LastName,
-			Bio:          user.Bio,
-			Email:        user.Email,
-			IsVerified:   user.IsVerified,
-			VerifiedDate: verifiedDate,
-			JoinDate:     user.CreatedAt.Time().Format(humanDateFormat),
-		}
+func createProfileResponse(u domain.User) MyProfileResponse {
+	var verifiedDate string
+	if u.VerifiedAt.Time().Unix() != 0 {
+		verifiedDate = u.VerifiedAt.Time().Format(humanDateFormat)
+	}
 
-		JSONResponse(w, response, 200)
+	return MyProfileResponse{
+		FullName:     u.FullName(),
+		FirstName:    u.FirstName,
+		MiddleName:   u.MiddleName,
+		LastName:     u.LastName,
+		Bio:          u.Bio,
+		Email:        u.Email,
+		IsVerified:   u.IsVerified,
+		VerifiedDate: verifiedDate,
+		JoinDate:     u.CreatedAt.Time().Format(humanDateFormat),
 	}
 }
