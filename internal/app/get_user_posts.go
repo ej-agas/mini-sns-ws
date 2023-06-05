@@ -27,7 +27,15 @@ func (handler GetUserPostsHandler) Handle() httprouter.Handle {
 
 		userId, err := primitive.ObjectIDFromHex(ps.ByName("id"))
 		if err != nil {
-			JSONResponse(w, Error{ErrInvalidUserId.Error()}, 422)
+			filter["username"] = ps.ByName("id")
+			result, err := handler.repo.FindBy(r.Context(), filter, *domain.NewFindOptions())
+
+			if err != nil {
+				JSONResponse(w, Error{err.Error()}, 422)
+				return
+			}
+
+			JSONResponse(w, domain.NewModelCollection(result), 200)
 			return
 		}
 
