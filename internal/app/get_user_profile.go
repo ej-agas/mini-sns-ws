@@ -13,6 +13,7 @@ const humanDateFormat = "January 2, 2006 3:04 PM MST"
 type UserProfileHandler struct {
 	authMiddleware AuthMiddleware
 	userRepo       domain.UserRepository
+	followingRepo  domain.FollowingRepository
 	router         *httprouter.Router
 }
 
@@ -24,6 +25,7 @@ func NewUserProfileHandler(authMiddleware AuthMiddleware, userRepo domain.UserRe
 }
 
 type UserProfileResponse struct {
+	ID           string `json:"id"`
 	FullName     string `json:"full_name"`
 	FirstName    string `json:"first_name"`
 	MiddleName   string `json:"middle_name"`
@@ -37,6 +39,8 @@ type UserProfileResponse struct {
 
 func (handler UserProfileHandler) Handle() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+		loggedInUser := (r.Context().Value(LoggedInUser)).(domain.User)
 
 		userId, err := primitive.ObjectIDFromHex(ps.ByName("id"))
 		if err != nil {
@@ -70,13 +74,14 @@ func (handler UserProfileHandler) Handle() httprouter.Handle {
 	}
 }
 
-func createProfileResponse(u domain.User) MyProfileResponse {
+func createProfileResponse(u domain.User) UserProfileResponse {
 	var verifiedDate string
 	if u.VerifiedAt.Time().Unix() != 0 {
 		verifiedDate = u.VerifiedAt.Time().Format(humanDateFormat)
 	}
 
-	return MyProfileResponse{
+	return UserProfileResponse{
+		ID:           u.ID.Hex(),
 		FullName:     u.FullName(),
 		FirstName:    u.FirstName,
 		MiddleName:   u.MiddleName,

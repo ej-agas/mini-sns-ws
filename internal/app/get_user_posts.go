@@ -14,7 +14,11 @@ type GetUserPostsHandler struct {
 	router          *httprouter.Router
 }
 
-func NewGetUserPostsHandler(authMiddleware AuthMiddleware, repo domain.PostRepository, router *httprouter.Router) *GetUserPostsHandler {
+func NewGetUserPostsHandler(
+	authMiddleware AuthMiddleware,
+	repo domain.PostRepository,
+	router *httprouter.Router,
+) *GetUserPostsHandler {
 	handler := &GetUserPostsHandler{authMiddlerware: authMiddleware, repo: repo, router: router}
 	handler.router.GET("/api/v1/users/:id/posts", CORS(handler.authMiddlerware.Handle(handler.Handle())))
 
