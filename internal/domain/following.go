@@ -19,7 +19,7 @@ func (f Following) Create(followerId primitive.ObjectID, followingId primitive.O
 	return &Following{
 		ID:        primitive.NewObjectIDFromTimestamp(now),
 		Follower:  followerId,
-		Following: followerId,
+		Following: followingId,
 		CreatedAt: primitive.NewDateTimeFromTime(now),
 	}
 }

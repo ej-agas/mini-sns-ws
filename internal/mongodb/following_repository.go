@@ -81,3 +81,11 @@ func (repository FollowingRepository) Followers(ctx context.Context, user domain
 
 	return results, nil
 }
+
+func (repository FollowingRepository) IsFollowing(ctx context.Context, follower domain.User, followee domain.User) bool {
+	if result := repository.FollowingCollection.FindOne(ctx, bson.M{"follower": follower.ID, "following": followee.ID}); result.Err() != nil {
+		return false
+	}
+
+	return true
+}

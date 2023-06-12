@@ -17,8 +17,8 @@ type UserProfileHandler struct {
 	router         *httprouter.Router
 }
 
-func NewUserProfileHandler(authMiddleware AuthMiddleware, userRepo domain.UserRepository, router *httprouter.Router) *UserProfileHandler {
-	handler := &UserProfileHandler{authMiddleware: authMiddleware, userRepo: userRepo, router: router}
+func NewUserProfileHandler(authMiddleware AuthMiddleware, userRepo domain.UserRepository, followingRepo domain.FollowingRepository, router *httprouter.Router) *UserProfileHandler {
+	handler := &UserProfileHandler{authMiddleware: authMiddleware, userRepo: userRepo, followingRepo: followingRepo, router: router}
 	handler.router.GET("/api/v1/users/:id", CORS(handler.authMiddleware.Handle(handler.Handle())))
 
 	return handler
@@ -35,14 +35,15 @@ type UserProfileResponse struct {
 	IsVerified   bool   `json:"is_verified"`
 	VerifiedDate string `json:"verified_date,omitempty"`
 	JoinDate     string `json:"join_date"`
+	IsFollowing  bool   `json:"is_following"`
 }
 
 func (handler UserProfileHandler) Handle() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
 		loggedInUser := (r.Context().Value(LoggedInUser)).(domain.User)
 
 		userId, err := primitive.ObjectIDFromHex(ps.ByName("id"))
+
 		if err != nil {
 
 			filter := domain.NewFilter()
@@ -55,7 +56,9 @@ func (handler UserProfileHandler) Handle() httprouter.Handle {
 				return
 			}
 
-			JSONResponse(w, createProfileResponse(user), 200)
+			isFollowing := handler.followingRepo.IsFollowing(r.Context(), loggedInUser, user)
+
+			JSONResponse(w, createProfileResponse(user, isFollowing), 200)
 
 			return
 		}
@@ -70,11 +73,13 @@ func (handler UserProfileHandler) Handle() httprouter.Handle {
 			return
 		}
 
-		JSONResponse(w, createProfileResponse(user), 200)
+		isFollowing := handler.followingRepo.IsFollowing(r.Context(), loggedInUser, user)
+
+		JSONResponse(w, createProfileResponse(user, isFollowing), 200)
 	}
 }
 
-func createProfileResponse(u domain.User) UserProfileResponse {
+func createProfileResponse(u domain.User, isFollowing bool) UserProfileResponse {
 	var verifiedDate string
 	if u.VerifiedAt.Time().Unix() != 0 {
 		verifiedDate = u.VerifiedAt.Time().Format(humanDateFormat)
@@ -91,5 +96,6 @@ func createProfileResponse(u domain.User) UserProfileResponse {
 		IsVerified:   u.IsVerified,
 		VerifiedDate: verifiedDate,
 		JoinDate:     u.CreatedAt.Time().Format(humanDateFormat),
+		IsFollowing:  isFollowing,
 	}
 }

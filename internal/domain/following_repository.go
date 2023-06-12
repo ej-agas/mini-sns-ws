@@ -11,4 +11,5 @@ type FollowingRepository interface {
 	Unfollow(ctx context.Context, follower User, userToUnfollow primitive.ObjectID) error
 	Following(ctx context.Context, user User) ([]Following, error)
 	Followers(ctx context.Context, user User) ([]Following, error)
+	IsFollowing(ctx context.Context, follower User, followee User) bool
 }
