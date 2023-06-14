@@ -39,8 +39,8 @@ func (handler GetFollowingHandler) Handle() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		user := (r.Context().Value(LoggedInUser)).(domain.User)
 
-		var followingIds []primitive.ObjectID
-		var followingUsers []Following
+		followingIds := make([]primitive.ObjectID, 0)
+		followingUsers := make([]Following, 0)
 
 		followingResult, err := handler.followingRepo.Following(r.Context(), user)
 
