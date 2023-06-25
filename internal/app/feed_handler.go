@@ -51,7 +51,7 @@ func (handler FeedHandler) Handle() httprouter.Handle {
 		userIds = append(userIds, user.ID.Hex())
 
 		for _, following := range followingIds {
-			userIds = append(userIds, following.ID.Hex())
+			userIds = append(userIds, following.Following.Hex())
 		}
 
 		if err != nil {
