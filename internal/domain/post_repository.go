@@ -10,4 +10,5 @@ type PostRepository interface {
 	Save(ctx context.Context, m Post) error
 	Delete(ctx context.Context, id string) error
 	DeleteBy(ctx context.Context, filter Filter) error
+	PostsCount(ctx context.Context, user User) int64
 }

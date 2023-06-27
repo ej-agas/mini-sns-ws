@@ -12,4 +12,6 @@ type FollowingRepository interface {
 	Following(ctx context.Context, user User) ([]Following, error)
 	Followers(ctx context.Context, user User) ([]Following, error)
 	IsFollowing(ctx context.Context, follower User, followee User) bool
+	FollowersCount(ctx context.Context, user User) int64
+	FollowingCount(ctx context.Context, user User) int64
 }

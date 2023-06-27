@@ -89,3 +89,23 @@ func (repository FollowingRepository) IsFollowing(ctx context.Context, follower 
 
 	return true
 }
+
+func (repository FollowingRepository) FollowersCount(ctx context.Context, user domain.User) int64 {
+	count, err := repository.FollowingCollection.CountDocuments(ctx, bson.M{"following": user.ID})
+
+	if err != nil {
+		return 0
+	}
+
+	return count
+}
+
+func (repository FollowingRepository) FollowingCount(ctx context.Context, user domain.User) int64 {
+	count, err := repository.FollowingCollection.CountDocuments(ctx, bson.M{"follower": user.ID})
+
+	if err != nil {
+		return 0
+	}
+
+	return count
+}

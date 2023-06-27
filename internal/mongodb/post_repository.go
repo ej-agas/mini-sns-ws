@@ -151,3 +151,13 @@ func (r PostRepository) DeleteBy(ctx context.Context, filter domain.Filter) erro
 
 	return nil
 }
+
+func (r PostRepository) PostsCount(ctx context.Context, user domain.User) int64 {
+	count, err := r.PostCollection.CountDocuments(ctx, bson.M{"user_id": user.ID})
+
+	if err != nil {
+		return 0
+	}
+
+	return count
+}

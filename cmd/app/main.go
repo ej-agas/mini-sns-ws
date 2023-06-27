@@ -77,7 +77,7 @@ func main() {
 	app.NewGetUserPostsHandler(authMiddleware, postRepository, router)
 
 	// Profile Handler
-	app.NewMyProfileHandler(authMiddleware, router)
+	app.NewMyProfileHandler(authMiddleware, followingRepository, postRepository, router)
 	app.NewUpdateMyProfileHandler(authMiddleware, hasher, validator, userRepository, router)
 
 	// Feed Handler
