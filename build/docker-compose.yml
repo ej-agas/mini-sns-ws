@@ -1,5 +1,5 @@
 version: '3.8'
- 
+
 services:
   app:
       image: mini-sns-ws:latest
@@ -21,7 +21,7 @@ services:
         MONGODB_URI: mongodb://root:tjGlF62fBY4OAMocf8y@mini-sns-mongodb:27017
       ports:
         - "6943:6943"
-      networks: 
+      networks:
         - mini-sns-network
       deploy:
         resources:
@@ -54,7 +54,7 @@ services:
       environment:
         MONGODB_INITDB_ROOT_USERNAME: root
         MONGODB_INITDB_ROOT_PASSWORD: tjGlF62fBY4OAMocf8y
-      networks: 
+      networks:
         - mini-sns-network
       volumes:
         - mongodb-data:/var/mongodb-data

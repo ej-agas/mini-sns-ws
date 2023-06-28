@@ -20,7 +20,11 @@ COPY . .
 
 ARG VERSION
 
-RUN CGO_ENABLED=0 go build -a -tags netgo,osusergo -buildvcs=false \
+ENV CGO_ENABLED=0
+ENV DOCKER_BUILDKIT=1
+
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    go build -a -tags netgo,osusergo -buildvcs=false \
     -ldflags "-extldflags '-static' -s -w" \
     -ldflags "-X main.version=$VERSION" -o mini_sns_app ./cmd/app
 
