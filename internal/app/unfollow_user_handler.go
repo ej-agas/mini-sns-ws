@@ -29,7 +29,7 @@ func NewUnfollowUserHandler(authMiddleware AuthMiddleware, validator *validator.
 		router:         router,
 	}
 
-	handler.router.DELETE("/api/v1/unfollow", handler.authMiddleware.Handle(handler.Handle()))
+	handler.router.DELETE("/api/v1/unfollow", CORS(handler.authMiddleware.Handle(handler.Handle())))
 
 	return handler
 }

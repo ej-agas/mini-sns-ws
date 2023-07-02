@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"mini-sns-ws/internal/domain"
 	"net/http"
 
@@ -62,8 +61,6 @@ func (handler UserProfileHandler) Handle() httprouter.Handle {
 			JSONResponse(w, Error{"user not found."}, 404)
 			return
 		}
-
-		fmt.Println(123)
 
 		postsCount := handler.postRepo.PostsCount(r.Context(), user)
 		followersCount := handler.followingRepo.FollowersCount(r.Context(), user)

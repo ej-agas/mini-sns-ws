@@ -35,7 +35,7 @@ func NewFollowUserHandler(authMiddleware AuthMiddleware, validator *validator.Va
 		router:         router,
 	}
 
-	handler.router.POST("/api/v1/follow", handler.authMiddleware.Handle(handler.Handle()))
+	handler.router.POST("/api/v1/follow", CORS(handler.authMiddleware.Handle(handler.Handle())))
 
 	return handler
 }
