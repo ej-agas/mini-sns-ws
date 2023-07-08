@@ -29,6 +29,7 @@ func NewMyProfileHandler(
 }
 
 type MyProfileResponse struct {
+	ID             string `json:"id"`
 	FullName       string `json:"full_name"`
 	FirstName      string `json:"first_name"`
 	MiddleName     string `json:"middle_name"`
@@ -57,6 +58,7 @@ func (handler MyProfileHandler) Handle() httprouter.Handle {
 		postsCount := handler.postRepo.PostsCount(r.Context(), user)
 
 		response := MyProfileResponse{
+			ID:             user.ID.Hex(),
 			FullName:       user.FullName(),
 			FirstName:      user.FirstName,
 			MiddleName:     user.MiddleName,

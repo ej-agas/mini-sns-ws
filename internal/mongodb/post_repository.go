@@ -78,8 +78,10 @@ func (r PostRepository) FindOneBy(ctx context.Context, filter domain.Filter) (do
 	return post, nil
 }
 
-func (r PostRepository) CreateFeed(ctx context.Context, ids []string, cursor string) ([]domain.Post, error) {
-	posts := make([]domain.Post, 0)
+func (r PostRepository) CreateFeed(ctx context.Context, ids []string, page uint) ([]domain.PostWithUser, error) {
+	perPage := 25
+	skip := (page - 1) * uint(perPage)
+	posts := make([]domain.PostWithUser, perPage)
 	var userIds []primitive.ObjectID
 
 	for _, v := range ids {
@@ -91,31 +93,57 @@ func (r PostRepository) CreateFeed(ctx context.Context, ids []string, cursor str
 		userIds = append(userIds, userId)
 	}
 
-	if cursor == "" {
-		mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}}, options.Find().SetLimit(25))
-
-		if err != nil {
-			return nil, fmt.Errorf("database Error: failed to create feed: %s", err.Error())
-		}
-
-		if err := mongoCursor.All(ctx, &posts); err != nil {
-			return nil, fmt.Errorf("database Error: failed to decode feed results: %s", err.Error())
-		}
-
-		return posts, nil
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"user_id": bson.M{
+					"$in": userIds,
+				},
+			},
+		},
+		{
+			"$lookup": bson.M{
+				"from":         "users",
+				"localField":   "user_id",
+				"foreignField": "_id",
+				"as":           "user",
+			},
+		},
+		{
+			"$unwind": "$user",
+		},
+		{
+			"$project": bson.M{
+				"_id":        1,
+				"title":      1,
+				"body":       1,
+				"user_id":    1,
+				"created_at": 1,
+				"updated_at": 1,
+				"user": bson.M{
+					"first_name":  1,
+					"middle_name": 1,
+					"last_name":   1,
+					"username":    1,
+					"picture":     1,
+				},
+			},
+		},
+		{
+			"$skip": skip,
+		},
+		{
+			"$limit": perPage,
+		},
 	}
 
-	cursorId, err := primitive.ObjectIDFromHex(cursor)
-	if err != nil {
-		return nil, fmt.Errorf("database Error: invalid cursor id: %s", err.Error())
-	}
-	mongoCursor, err := r.PostCollection.Find(ctx, bson.M{"user_id": bson.M{"$in": userIds}, "_id": bson.M{"$gt": cursorId}}, options.Find().SetLimit(25))
+	cursor, err := r.PostCollection.Aggregate(ctx, pipeline)
 
 	if err != nil {
 		return nil, fmt.Errorf("database Error: failed to create feed: %s", err.Error())
 	}
 
-	if err := mongoCursor.All(ctx, &posts); err != nil {
+	if err := cursor.All(ctx, &posts); err != nil {
 		return nil, fmt.Errorf("database Error: failed to decode feed results: %s", err.Error())
 	}
 

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"mini-sns-ws/internal/domain"
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type FeedHandler struct {
@@ -17,7 +17,7 @@ type FeedHandler struct {
 }
 
 type FeedData struct {
-	Data []domain.Post `json:"data"`
+	Data []domain.PostWithUser `json:"data"`
 }
 
 func NewFeedHandler(authMiddleware AuthMiddleware, postRepo domain.PostRepository, followingRepo domain.FollowingRepository, router *httprouter.Router) *FeedHandler {
@@ -31,18 +31,10 @@ func (handler FeedHandler) Handle() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		user := (r.Context().Value(LoggedInUser)).(domain.User)
 
-		var cursor string
-
-		cursorInput := r.URL.Query().Get("cursor")
-		if cursorInput != "" {
-			id, err := primitive.ObjectIDFromHex(cursorInput)
-
-			if err != nil {
-				JSONResponse(w, Error{"invalid cursor"}, 400)
-				return
-			}
-
-			cursor = id.Hex()
+		page, err := strconv.ParseUint(r.URL.Query().Get("page"), 10, 64)
+		if err != nil {
+			JSONResponse(w, Error{"invalid page."}, 400)
+			return
 		}
 
 		followingIds, err := handler.followingRepo.Following(r.Context(), user)
@@ -59,7 +51,7 @@ func (handler FeedHandler) Handle() httprouter.Handle {
 			return
 		}
 
-		feed, err := handler.postRepo.CreateFeed(r.Context(), userIds, cursor)
+		feed, err := handler.postRepo.CreateFeed(r.Context(), userIds, uint(page))
 
 		if err != nil {
 			JSONResponse(w, Error{fmt.Sprintf("Error getting feed: %s", err.Error())}, 500)
