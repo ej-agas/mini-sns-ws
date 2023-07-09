@@ -31,6 +31,7 @@ type UserProfileResponse struct {
 	FirstName      string `json:"first_name"`
 	MiddleName     string `json:"middle_name"`
 	LastName       string `json:"last_name"`
+	Username       string `json:"username"`
 	Bio            string `json:"bio"`
 	Email          string `json:"email"`
 	IsVerified     bool   `json:"is_verified"`
@@ -77,6 +78,7 @@ func (handler UserProfileHandler) Handle() httprouter.Handle {
 			FirstName:      user.FirstName,
 			MiddleName:     user.MiddleName,
 			LastName:       user.LastName,
+			Username:       user.Username,
 			Bio:            user.Bio,
 			Email:          user.Email,
 			IsVerified:     user.IsVerified,
